@@ -4,9 +4,10 @@ import { LRUCache } from "lru-cache";
 import { Category } from "../models/category";
 
 export class CategoryData {
-  private readonly cacheName = "categoryData";
-  private readonly collectionName = "categories";
-  private readonly cachedTime = 60 * 60 * 1000; // in milliseconds: 1 hour;
+  public readonly collectionName = "categories";
+
+  private readonly cacheName = "CategoryData";
+  private readonly cachedTime = 60 * 60 * 1000; // in ms: 1 hour;
   private readonly categoryCollectionRef = collection(db, this.collectionName);
 
   private readonly cacheOption = {

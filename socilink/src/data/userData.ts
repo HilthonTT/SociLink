@@ -13,9 +13,10 @@ import { User } from "../models/user";
 import { LRUCache } from "lru-cache";
 
 export class UserData {
-  private readonly cacheName = "userData";
-  private readonly collectionName = "users";
-  private readonly cachedTime = 60 * 60 * 1000; // in miliseconds: 1 hour
+  public readonly collectionName = "users";
+
+  private readonly cacheName = "UserData";
+  private readonly cachedTime = 60 * 60 * 1000; // in ms: 1 hour
   private readonly userCollectionRef = collection(db, this.collectionName);
 
   private readonly cacheOptions = {
@@ -34,6 +35,7 @@ export class UserData {
         ...(doc.data() as User),
         id: doc.id,
       }));
+
       this.cache.set(this.cacheName, users);
     }
 
