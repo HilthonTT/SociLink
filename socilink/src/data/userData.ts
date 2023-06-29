@@ -13,17 +13,27 @@ import { User } from "../models/user";
 import { LRUCache } from "lru-cache";
 
 export class UserData {
-  private cacheName = "userData";
-  private collectionName = "users";
-  private userCollectionRef = collection(db, this.collectionName);
-  private cache = new LRUCache({ max: 1000000 });
+  private readonly cacheName = "userData";
+  private readonly collectionName = "users";
+  private readonly cachedTime = 60 * 60 * 1000; // in miliseconds: 1 hour
+  private readonly userCollectionRef = collection(db, this.collectionName);
+
+  private readonly cacheOptions = {
+    ttl: this.cachedTime,
+    ttlAutopurge: true,
+  };
+
+  private readonly cache = new LRUCache(this.cacheOptions);
 
   public getUsersAsync = async (): Promise<User[]> => {
     let users = this.cache.get(this.cacheName) as User[];
 
     if (users === null) {
       const data = await getDocs(this.userCollectionRef);
-      users = data.docs.map((doc) => ({ ...(doc.data() as User), id: doc.id }));
+      users = data.docs.map((doc) => ({
+        ...(doc.data() as User),
+        id: doc.id,
+      }));
       this.cache.set(this.cacheName, users);
     }
 
