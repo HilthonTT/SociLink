@@ -1,5 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 import { BasicThread } from "./basicThread";
+import { BasicComment } from "./basicComment";
 
 export class User {
   id: string;
@@ -11,6 +12,7 @@ export class User {
   dateCreated: Timestamp = Timestamp.now();
   authoredThreads: BasicThread[] = [];
   votedOnThreads: BasicThread[] = [];
+  authoredComments: BasicComment[] = [];
 
   constructor(
     id: string,
