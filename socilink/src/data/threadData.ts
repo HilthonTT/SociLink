@@ -12,16 +12,26 @@ import {
 import { db } from "../firebase/firebase";
 import { LRUCache } from "lru-cache";
 import { Thread } from "../models/thread";
-import { UserData } from "./userData";
+import { IUserData, UserData } from "./userData";
 import { BasicThread } from "../models/basicThread";
 
-export class ThreadData {
+export interface IThreadData {
+  collectionName: string;
+  getThreadsAsync: () => Promise<Thread[]>;
+  getThreadAsync: (id: string) => Promise<Thread>;
+  getUserThreadAsync: (userId: string) => Promise<Thread>;
+  updateThreadAsync: (thread: Thread) => Promise<void>;
+  createThreadAsync: (thread: Thread) => Promise<void>;
+  updateVoteThreadAsync: (threadId: string, userId: string) => Promise<void>;
+}
+
+export class ThreadData implements IThreadData {
   public readonly collectionName = "threads";
 
   private readonly cacheName = "ThreadData";
   private readonly cachedTime = 60 * 60 * 1000; // in ms: 1 hour
   private readonly threadCollectionRef = collection(db, this.collectionName);
-  private readonly userData = new UserData();
+  private readonly userData: IUserData = new UserData();
 
   private readonly cacheOptions = {
     ttl: this.cachedTime,
@@ -88,12 +98,12 @@ export class ThreadData {
     return thread;
   };
 
-  public updateThreadAsync = async (thread: Thread) => {
+  public updateThreadAsync = async (thread: Thread): Promise<void> => {
     const threadDoc = doc(db, this.collectionName, thread.id);
     await updateDoc(threadDoc, { thread });
   };
 
-  public createThreadAsync = async (thread: Thread) => {
+  public createThreadAsync = async (thread: Thread): Promise<void> => {
     try {
       await runTransaction(db, async (transaction) => {
         await addDoc(this.threadCollectionRef, thread);
@@ -110,7 +120,10 @@ export class ThreadData {
     }
   };
 
-  public updateVoteThreadAsync = async (threadId: string, userId: string) => {
+  public updateVoteThreadAsync = async (
+    threadId: string,
+    userId: string
+  ): Promise<void> => {
     try {
       await runTransaction(db, async (transaction) => {
         const thread = await this.getThreadAsync(threadId);

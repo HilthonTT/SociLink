@@ -9,15 +9,22 @@ import {
 import { LRUCache } from "lru-cache";
 import { db } from "../firebase/firebase";
 import { Comment } from "../models/comment";
-import { UserData } from "./userData";
+import { IUserData, UserData } from "./userData";
 import { BasicComment } from "../models/basicComment";
 
-export class CommentData {
+export interface ICommentData {
+  collectionName: string;
+  getThreadCommentsAsync: (threadId: string) => Promise<Comment[]>;
+  updateCommentAsync: (comment: Comment) => Promise<void>;
+  createCommentAsync: (comment: Comment) => Promise<void>;
+}
+
+export class CommentData implements ICommentData {
   public readonly collectionName = "comments";
 
   private readonly cachedTime = 60 * 60 * 1000; // in ms: 1 hour
   private readonly commentCollectionRef = collection(db, this.collectionName);
-  private readonly userData = new UserData();
+  private readonly userData: IUserData = new UserData();
 
   private readonly cacheOptions = {
     ttl: this.cachedTime,
@@ -46,12 +53,12 @@ export class CommentData {
     return comments;
   };
 
-  public updateCommentAsync = async (comment: Comment) => {
+  public updateCommentAsync = async (comment: Comment): Promise<void> => {
     const commentDoc = doc(db, this.collectionName, comment.id);
     await updateDoc(commentDoc, { comment });
   };
 
-  public createCommentAsync = async (comment: Comment) => {
+  public createCommentAsync = async (comment: Comment): Promise<void> => {
     try {
       await runTransaction(db, async (transaction) => {
         await addDoc(this.commentCollectionRef, comment);

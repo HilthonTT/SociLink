@@ -3,7 +3,13 @@ import { db } from "../firebase/firebase";
 import { LRUCache } from "lru-cache";
 import { Category } from "../models/category";
 
-export class CategoryData {
+export interface ICategoryData {
+  collectionName: string;
+  getCategoriesAsync: () => Promise<Category[]>;
+  createCategoryAsync: (category: Category) => Promise<void>;
+}
+
+export class CategoryData implements ICategoryData {
   public readonly collectionName = "categories";
 
   private readonly cacheName = "CategoryData";
@@ -33,7 +39,7 @@ export class CategoryData {
     return categories;
   };
 
-  public createCategoryAsync = async (category: Category) => {
+  public createCategoryAsync = async (category: Category): Promise<void> => {
     await addDoc(this.categoryCollectionRef, category);
   };
 }

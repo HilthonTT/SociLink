@@ -12,7 +12,16 @@ import { db } from "../firebase/firebase";
 import { User } from "../models/user";
 import { LRUCache } from "lru-cache";
 
-export class UserData {
+export interface IUserData {
+  collectionName: string;
+  getUsersAsync: () => Promise<User[]>;
+  getUserAsync: (id: string) => Promise<User>;
+  getUserFromAuth: (objectId: string) => Promise<User>;
+  createUserAsync: (user: User) => Promise<void>;
+  updateUser: (user: User) => Promise<void>;
+}
+
+export class UserData implements IUserData {
   public readonly collectionName = "users";
 
   private readonly cacheName = "UserData";
@@ -83,11 +92,11 @@ export class UserData {
     return user;
   };
 
-  public createUserAsync = async (user: User) => {
+  public createUserAsync = async (user: User): Promise<void> => {
     await addDoc(this.userCollectionRef, user);
   };
 
-  public updateUser = async (user: User) => {
+  public updateUser = async (user: User): Promise<void> => {
     const userDoc = doc(db, this.collectionName, user.id);
     await updateDoc(userDoc, { user });
   };
