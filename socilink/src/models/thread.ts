@@ -7,6 +7,7 @@ export class Thread {
   description: string;
   dateCreated: Timestamp = Timestamp.now();
   author: BasicUser;
+  downloadUrl: string;
   userVotes: Set<string> = new Set<string>();
   archived: boolean = false;
 
@@ -14,11 +15,13 @@ export class Thread {
     id: string,
     thread: string,
     description: string,
+    downloadUrl: string,
     author: BasicUser
   ) {
     this.id = id;
     this.thread = thread;
     this.description = description;
+    this.downloadUrl = downloadUrl;
     this.author = author;
   }
 }
