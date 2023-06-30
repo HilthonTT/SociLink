@@ -10,6 +10,7 @@ export class User {
   displayName: string;
   email: string;
   dateCreated: Timestamp = Timestamp.now();
+  downloadUrl: string;
   authoredThreads: BasicThread[] = [];
   votedOnThreads: BasicThread[] = [];
   authoredComments: BasicComment[] = [];
@@ -20,7 +21,8 @@ export class User {
     firstName: string,
     lastName: string,
     displayName: string,
-    email: string
+    email: string,
+    downloadUrl: string
   ) {
     this.id = id;
     this.objectIdentifier = objectIdentifier;
@@ -28,5 +30,6 @@ export class User {
     this.lastName = lastName;
     this.displayName = displayName;
     this.email = email;
+    this.downloadUrl = downloadUrl;
   }
 }
