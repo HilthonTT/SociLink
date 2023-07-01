@@ -44,7 +44,7 @@ export class ThreadData implements IThreadData {
   public getThreadsAsync = async (): Promise<Thread[]> => {
     let threads = this.cache.get(this.cacheName) as Thread[];
 
-    if (threads === null) {
+    if (threads === undefined) {
       const q = query(this.threadCollectionRef, where("archived", "==", false));
       const querySnapshot = await getDocs(q);
       threads = querySnapshot.docs.map((doc) => ({
@@ -62,7 +62,7 @@ export class ThreadData implements IThreadData {
     const key = `thread-${id}`;
     let thread = this.cache.get(key) as Thread;
 
-    if (thread === null) {
+    if (thread === undefined) {
       const threadDoc = doc(db, this.collectionName, id);
       const data = await getDoc(threadDoc);
       thread = data.data() as Thread;
@@ -78,7 +78,7 @@ export class ThreadData implements IThreadData {
 
     let thread = this.cache.get(key) as Thread;
 
-    if (thread === null) {
+    if (thread === undefined) {
       const q = query(
         this.threadCollectionRef,
         where("author.id", "==", userId)
@@ -107,9 +107,13 @@ export class ThreadData implements IThreadData {
   public createThreadAsync = async (thread: Thread): Promise<void> => {
     try {
       await runTransaction(db, async (transaction) => {
-        const threadDocRef = await addDoc(this.threadCollectionRef, thread);
+        const threadDocRef = await addDoc(this.threadCollectionRef, {
+          ...thread,
+        });
+
         thread.id = threadDocRef.id;
-        await setDoc(doc(db, threadDocRef.path), thread);
+        const threadObject = { ...thread };
+        await setDoc(doc(db, threadDocRef.path), threadObject);
 
         const user = await this.userData.getUserAsync(thread.author.id);
         user.authoredThreads.push(BasicThread.fromThread(thread));

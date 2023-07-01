@@ -30,7 +30,7 @@ export class ImageData implements IImageData {
   public fetch = async (fileName: string): Promise<string> => {
     let cachedUrl = this.cache.get(fileName) as string;
 
-    if (cachedUrl === null) {
+    if (cachedUrl === undefined) {
       const storageRef = ref(storage, fileName);
       const downloadURL = await getDownloadURL(storageRef);
 

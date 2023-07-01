@@ -41,7 +41,7 @@ export class CommentData implements ICommentData {
 
     let comments = this.cache.get(key) as Comment[];
 
-    if (comments === null) {
+    if (comments === undefined) {
       const data = await getDocs(this.commentCollectionRef);
       comments = data.docs.map((doc) => ({
         ...(doc.data() as Comment),
@@ -62,9 +62,12 @@ export class CommentData implements ICommentData {
   public createCommentAsync = async (comment: Comment): Promise<void> => {
     try {
       await runTransaction(db, async (transaction) => {
-        const commentDocRef = await addDoc(this.commentCollectionRef, comment);
+        const commentDocRef = await addDoc(this.commentCollectionRef, {
+          ...comment,
+        });
         comment.id = commentDocRef.id;
-        await setDoc(doc(db, commentDocRef.path), comment);
+        const commentObject = { ...comment };
+        await setDoc(doc(db, commentDocRef.path), commentObject);
 
         const user = await this.userData.getUserAsync(comment.author.id);
         user.authoredComments.push(BasicComment.fromComment(comment));
