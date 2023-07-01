@@ -66,15 +66,18 @@ export class CommentData implements ICommentData {
           ...comment,
         });
         comment.id = commentDocRef.id;
-        const commentObject = { ...comment };
-        await setDoc(doc(db, commentDocRef.path), commentObject);
 
         const user = await this.userData.getUserAsync(comment.author.id);
         user.authoredComments.push(BasicComment.fromComment(comment));
 
-        const userDocRef = doc(db, this.collectionName, user.id);
+        const userDocRef = doc(db, this.userData.collectionName, user.id);
 
-        transaction.update(userDocRef, { user });
+        transaction.update(userDocRef, {
+          authoredComments: user.authoredComments,
+        });
+
+        const commentObject = { ...comment };
+        await setDoc(doc(db, commentDocRef.path), commentObject);
       });
     } catch (error) {
       throw error;

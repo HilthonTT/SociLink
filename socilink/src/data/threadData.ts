@@ -110,17 +110,19 @@ export class ThreadData implements IThreadData {
         const threadDocRef = await addDoc(this.threadCollectionRef, {
           ...thread,
         });
-
         thread.id = threadDocRef.id;
-        const threadObject = { ...thread };
-        await setDoc(doc(db, threadDocRef.path), threadObject);
 
         const user = await this.userData.getUserAsync(thread.author.id);
         user.authoredThreads.push(BasicThread.fromThread(thread));
 
-        const userDocRef = doc(db, this.collectionName, user.id);
+        const userDocRef = doc(db, this.userData.collectionName, user.id);
 
-        transaction.update(userDocRef, { user });
+        transaction.update(userDocRef, {
+          authoredThreads: user.authoredThreads,
+        });
+
+        const threadObject = { ...thread };
+        await setDoc(doc(db, threadDocRef.path), threadObject);
       });
     } catch (error) {
       throw error;
@@ -134,32 +136,36 @@ export class ThreadData implements IThreadData {
     try {
       await runTransaction(db, async (transaction) => {
         const thread = await this.getThreadAsync(threadId);
-
-        const isUpVote = thread.userVotes.has(userId);
+        const isUpVote = thread.userVotes.includes(userId);
 
         if (isUpVote) {
-          thread.userVotes.delete(userId);
+          const index = thread.userVotes.indexOf(userId);
+          if (index !== -1) {
+            thread.userVotes.splice(index, 1);
+          }
         }
 
         const threadDocRef = doc(db, this.collectionName, thread.id);
-        await updateDoc(threadDocRef, { thread });
+        await updateDoc(threadDocRef, { ...thread });
 
         const user = await this.userData.getUserAsync(userId);
-        const userDocRef = doc(db, this.userData.collectionName);
+        const userDocRef = doc(db, this.userData.collectionName, user.id);
 
         if (isUpVote) {
           const newThread = BasicThread.fromThread(thread);
           user.votedOnThreads.push(newThread);
         } else {
-          const threadToRemove = user.authoredThreads.find(
+          const threadToRemove = user.votedOnThreads.find(
             (t) => t.id === threadId
           ) as BasicThread;
-          user.authoredThreads = user.authoredThreads.filter(
+          user.votedOnThreads = user.votedOnThreads.filter(
             (t) => t.id !== threadToRemove.id
           );
         }
 
-        transaction.update(userDocRef, { user });
+        transaction.update(userDocRef, {
+          votedOnThreads: user.votedOnThreads,
+        });
       });
     } catch (error) {
       throw error;
