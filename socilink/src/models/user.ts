@@ -16,7 +16,6 @@ export class User {
   authoredComments: BasicComment[] = [];
 
   constructor(
-    id: string,
     objectIdentifier: string,
     firstName: string,
     lastName: string,
@@ -24,7 +23,7 @@ export class User {
     email: string,
     downloadUrl: string
   ) {
-    this.id = id;
+    this.id = "";
     this.objectIdentifier = objectIdentifier;
     this.firstName = firstName;
     this.lastName = lastName;

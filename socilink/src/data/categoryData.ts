@@ -1,4 +1,4 @@
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, setDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { LRUCache } from "lru-cache";
 import { Category } from "../models/category";
@@ -40,6 +40,8 @@ export class CategoryData implements ICategoryData {
   };
 
   public createCategoryAsync = async (category: Category): Promise<void> => {
-    await addDoc(this.categoryCollectionRef, category);
+    const categoryDocRef = await addDoc(this.categoryCollectionRef, category);
+    category.id = categoryDocRef.id;
+    await setDoc(doc(db, categoryDocRef.path), category);
   };
 }

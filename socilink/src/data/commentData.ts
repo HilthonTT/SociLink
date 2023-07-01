@@ -4,6 +4,7 @@ import {
   doc,
   getDocs,
   runTransaction,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
 import { LRUCache } from "lru-cache";
@@ -61,7 +62,9 @@ export class CommentData implements ICommentData {
   public createCommentAsync = async (comment: Comment): Promise<void> => {
     try {
       await runTransaction(db, async (transaction) => {
-        await addDoc(this.commentCollectionRef, comment);
+        const commentDocRef = await addDoc(this.commentCollectionRef, comment);
+        comment.id = commentDocRef.id;
+        await setDoc(doc(db, commentDocRef.path), comment);
 
         const user = await this.userData.getUserAsync(comment.author.id);
         user.authoredComments.push(BasicComment.fromComment(comment));

@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   query,
+  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -93,7 +94,9 @@ export class UserData implements IUserData {
   };
 
   public createUserAsync = async (user: User): Promise<void> => {
-    await addDoc(this.userCollectionRef, user);
+    const docRef = await addDoc(this.userCollectionRef, { ...user, id: "" });
+    user.id = docRef.id;
+    await setDoc(doc(db, docRef.path), user);
   };
 
   public updateUser = async (user: User): Promise<void> => {

@@ -6,6 +6,7 @@ import {
   getDocs,
   query,
   runTransaction,
+  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -106,7 +107,9 @@ export class ThreadData implements IThreadData {
   public createThreadAsync = async (thread: Thread): Promise<void> => {
     try {
       await runTransaction(db, async (transaction) => {
-        await addDoc(this.threadCollectionRef, thread);
+        const threadDocRef = await addDoc(this.threadCollectionRef, thread);
+        thread.id = threadDocRef.id;
+        await setDoc(doc(db, threadDocRef.path), thread);
 
         const user = await this.userData.getUserAsync(thread.author.id);
         user.authoredThreads.push(BasicThread.fromThread(thread));

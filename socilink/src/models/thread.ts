@@ -12,13 +12,12 @@ export class Thread {
   archived: boolean = false;
 
   constructor(
-    id: string,
     thread: string,
     description: string,
     downloadUrl: string,
     author: BasicUser
   ) {
-    this.id = id;
+    this.id = "";
     this.thread = thread;
     this.description = description;
     this.downloadUrl = downloadUrl;

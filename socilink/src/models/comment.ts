@@ -10,13 +10,8 @@ export class Comment {
   dateCreated: Timestamp = Timestamp.now();
   archived: boolean = false;
 
-  constructor(
-    id: string,
-    comment: string,
-    thread: BasicThread,
-    author: BasicUser
-  ) {
-    this.id = id;
+  constructor(comment: string, thread: BasicThread, author: BasicUser) {
+    this.id = "";
     this.comment = comment;
     this.thread = thread;
     this.author = author;
