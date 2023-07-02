@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { IUserData, UserData } from "../data/userData";
 import {
+  User,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
 import { useNavigate } from "react-router-dom";
-import { User } from "../models/user";
+import { User as IUser } from "../models/user";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -18,7 +18,7 @@ export const Register = () => {
   const userData: IUserData = new UserData();
   const navigate = useNavigate();
 
-  const [user] = useAuthState(auth);
+  const [user, setUser] = useState<User | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -72,7 +72,7 @@ export const Register = () => {
 
       const objectIdentifier = registeredUser.user.uid;
 
-      const newUser = new User(
+      const newUser = new IUser(
         objectIdentifier,
         firstName,
         lastName,
@@ -82,6 +82,8 @@ export const Register = () => {
       );
 
       await userData.createUserAsync(newUser);
+
+      await signInWithEmailAndPassword(auth, email, password);
 
       navigate("/");
     } catch (error) {
@@ -94,6 +96,12 @@ export const Register = () => {
       navigate("/");
     }
   };
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+  });
 
   useEffect(() => {
     getAuthState();
