@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { IUserData, UserData } from "../data/userData";
 import {
-  User,
+  User as FirebaseUser,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -20,7 +20,7 @@ export const Register = () => {
   const imageData: IImageData = new ImageData();
   const navigate = useNavigate();
 
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
@@ -95,8 +95,8 @@ export const Register = () => {
         navigate("/");
       }
     } catch (error) {
-      const errorMessageString = (error as Error).message;
-      setErrorMessage(errorMessageString);
+      const errorMessage = (error as Error).message;
+      setErrorMessage(errorMessage);
     }
   };
 
@@ -118,7 +118,7 @@ export const Register = () => {
     onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-  });
+  }, []);
 
   useEffect(() => {
     getAuthState();
