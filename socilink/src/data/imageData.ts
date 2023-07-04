@@ -3,8 +3,8 @@ import { storage } from "../firebase/firebase";
 import { LRUCache } from "lru-cache";
 
 export interface IImageData {
-  upload: (file: File, fileName: string) => Promise<string>;
-  fetch: (fileName: string) => Promise<string>;
+  uploadAsync: (file: File, fileName: string) => Promise<string>;
+  fetchAsync: (fileName: string) => Promise<string>;
 }
 
 export class ImageData implements IImageData {
@@ -17,7 +17,10 @@ export class ImageData implements IImageData {
 
   private readonly cache = new LRUCache(this.cacheOption);
 
-  public upload = async (file: File, fileName: string): Promise<string> => {
+  public uploadAsync = async (
+    file: File,
+    fileName: string
+  ): Promise<string> => {
     const storageRef = ref(storage, fileName);
     await uploadBytes(storageRef, file);
 
@@ -27,7 +30,7 @@ export class ImageData implements IImageData {
     return downloadURL;
   };
 
-  public fetch = async (fileName: string): Promise<string> => {
+  public fetchAsync = async (fileName: string): Promise<string> => {
     let cachedUrl = this.cache.get(fileName) as string;
 
     if (cachedUrl === undefined) {

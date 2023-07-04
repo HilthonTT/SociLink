@@ -13,30 +13,28 @@ import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { RegistrationData } from "../form-models/registrationData";
+import { IImageData, ImageData } from "../data/imageData";
 
 export const Register = () => {
   const userData: IUserData = new UserData();
+  const imageData: IImageData = new ImageData();
   const navigate = useNavigate();
 
   const [user, setUser] = useState<User | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
   const schema = yup.object().shape({
     firstName: yup
       .string()
       .required("Your first name is required.")
-      .min(5, "Your first name must be at least 5 characters")
-      .max(100, "Your first name must not be above 100 characters."),
+      .min(2, "Your first name must be at least 2 characters")
+      .max(200, "Your first name must not be above 200 characters."),
     lastName: yup
       .string()
       .required("Your last name is required")
-      .min(5, "Your last name must be at least 5 characters")
-      .max(100, "Your last name must not be above 100 characters."),
+      .min(2, "Your last name must be at least 2 characters")
+      .max(200, "Your last name must not be above 200 characters."),
     displayName: yup.string().required("Your display name is required"),
     email: yup.string().email().required("Your email is required"),
     password: yup
@@ -66,28 +64,47 @@ export const Register = () => {
 
       const registeredUser = await createUserWithEmailAndPassword(
         auth,
-        email,
-        password
+        data.email,
+        data.password
       );
 
       const objectIdentifier = registeredUser.user.uid;
 
       const newUser = new IUser(
         objectIdentifier,
-        firstName,
-        lastName,
-        displayName,
-        email,
+        data.firstName,
+        data.lastName,
+        data.displayName,
+        data.email,
         ""
       );
 
+      if (file) {
+        newUser.downloadUrl = await imageData.uploadAsync(file, file.name);
+      }
+
       await userData.createUserAsync(newUser);
 
-      await signInWithEmailAndPassword(auth, email, password);
+      const signedInUser = await signInWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      );
 
-      navigate("/");
+      if (signedInUser) {
+        navigate("/");
+      }
     } catch (error) {
-      setErrorMessage(error as string);
+      const errorMessageString = (error as Error).message;
+      setErrorMessage(errorMessageString);
+    }
+  };
+
+  const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fetchedFile = event.target.files?.[0];
+
+    if (fetchedFile) {
+      setFile(fetchedFile);
     }
   };
 
@@ -107,5 +124,77 @@ export const Register = () => {
     getAuthState();
   }, [user]);
 
-  return <div></div>;
+  return (
+    <div>
+      {errorMessage && <div>{errorMessage}</div>}
+      <div>
+        <form onSubmit={handleSubmit(onRegistration)}>
+          <div>
+            <label id="profile-picture">Profile Picture</label>
+            <input type="file" onChange={onFileChange} />
+          </div>
+          <div>
+            <label id="first-name">First Name</label>
+            <input
+              id="first-name"
+              placeholder="Enter your first name"
+              {...register("firstName")}
+            />
+            {errors.firstName?.message}
+          </div>
+          <div>
+            <label id="last-name">Last Name</label>
+            <input
+              id="last-name"
+              placeholder="Enter your last name"
+              {...register("lastName")}
+            />
+            {errors.lastName?.message}
+          </div>
+          <div>
+            <label id="display-name">Display Name</label>
+            <input
+              id="display-name"
+              placeholder="Enter your display name"
+              {...register("displayName")}
+            />
+            {errors.displayName?.message}
+          </div>
+          <div>
+            <label id="email">Email Address</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your email address"
+              {...register("email")}
+            />
+            {errors.email?.message}
+          </div>
+          <div>
+            <label id="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              {...register("password")}
+            />
+            {errors.password?.message}
+          </div>
+          <div>
+            <label id="confirm-password">Confirm Password</label>
+            <input
+              id="confirm-password"
+              type="password"
+              placeholder="Enter your password again to confirm"
+              {...register("confirmedPassword")}
+            />
+            {errors.confirmedPassword?.message}
+          </div>
+          <div>
+            <button type="submit">Register</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };
