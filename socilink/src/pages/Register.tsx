@@ -28,15 +28,15 @@ export const Register = () => {
     firstName: yup
       .string()
       .required("Your first name is required.")
-      .min(2, "Your first name must be at least 2 characters")
-      .max(200, "Your first name must not be above 200 characters."),
+      .min(2, "Your first name must be at least 2 characters long")
+      .max(200, "Your first name must not be above 200 characters long."),
     lastName: yup
       .string()
-      .required("Your last name is required")
-      .min(2, "Your last name must be at least 2 characters")
-      .max(200, "Your last name must not be above 200 characters."),
-    displayName: yup.string().required("Your display name is required"),
-    email: yup.string().email().required("Your email is required"),
+      .required("Your last name is required.")
+      .min(2, "Your last name must be at least 2 characters long")
+      .max(200, "Your last name must not be above 200 characters long."),
+    displayName: yup.string().required("Your display name is required."),
+    email: yup.string().email().required("Your email is required."),
     password: yup
       .string()
       .matches(
