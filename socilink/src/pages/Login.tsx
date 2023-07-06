@@ -65,5 +65,32 @@ export const Login = () => {
     getAuthState();
   }, [user]);
 
-  return <div></div>;
+  return (
+    <div>
+      <div>{errorMessage && <div>{errorMessage}</div>}</div>
+      <div>
+        <form onSubmit={handleSubmit(onLogin)}>
+          <div>
+            <label id="email">Email Address</label>
+            <input
+              type="text"
+              placeholder="Enter your email address"
+              {...register("email")}
+            />
+          </div>
+          <div>
+            <label id="password">Password</label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              {...register("password")}
+            />
+          </div>
+          <div>
+            <button type="submit">Login</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };
