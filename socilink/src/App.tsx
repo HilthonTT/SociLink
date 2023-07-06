@@ -5,6 +5,7 @@ import { SampleData } from "./pages/SampleData";
 import { Register } from "./pages/Register";
 import { Login } from "./pages/Login";
 import { Logout } from "./pages/Logout";
+import { Create } from "./pages/Create";
 
 export const App = () => {
   return (
@@ -16,6 +17,7 @@ export const App = () => {
           <Route path="/Register" element={<Register />} />
           <Route path="/Login" element={<Login />} />
           <Route path="/Logout" element={<Logout />} />
+          <Route path="/Create" element={<Create />} />
         </Routes>
       </Router>
     </div>
