@@ -26,11 +26,11 @@ export const Home = () => {
 
   useEffect(() => {
     getThreadsAsync();
-  }, [threads]);
+  }, []);
 
   useEffect(() => {
     getCategoriesAsync();
-  }, [categories]);
+  }, []);
 
   return (
     <div>
