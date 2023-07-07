@@ -62,7 +62,7 @@ export class ThreadData implements IThreadData {
     const key = `thread-${id}`;
     let thread = this.cache.get(key) as Thread;
 
-    if (thread === undefined) {
+    if (thread === undefined || thread === null) {
       const threadDoc = doc(db, this.collectionName, id);
       const data = await getDoc(threadDoc);
       thread = data.data() as Thread;
@@ -78,7 +78,7 @@ export class ThreadData implements IThreadData {
 
     let thread = this.cache.get(key) as Thread;
 
-    if (thread === undefined) {
+    if (thread === undefined || thread === null) {
       const q = query(
         this.threadCollectionRef,
         where("author.id", "==", userId)
