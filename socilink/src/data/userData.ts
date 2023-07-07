@@ -56,7 +56,7 @@ export class UserData implements IUserData {
     const key = `user-${id}`;
     let user = this.cache.get(key) as User;
 
-    if (user === undefined) {
+    if (user === undefined || user === null) {
       const userDoc = doc(db, this.collectionName, id);
       const data = await getDoc(userDoc);
       user = data.data() as User;
@@ -71,7 +71,7 @@ export class UserData implements IUserData {
     const key = `user-${objectId}`;
     let user = this.cache.get(key) as User;
 
-    if (user === undefined) {
+    if (user === undefined || user === null) {
       const q = query(
         this.userCollectionRef,
         where("objectIdentifier", "==", objectId)

@@ -26,7 +26,7 @@ export class CategoryData implements ICategoryData {
   public getCategoriesAsync = async (): Promise<Category[]> => {
     let categories = this.cache.get(this.cacheName) as Category[];
 
-    if (categories === undefined) {
+    if (categories === undefined || categories === null) {
       const data = await getDocs(this.categoryCollectionRef);
       categories = data.docs.map((doc) => ({
         ...(doc.data() as Category),

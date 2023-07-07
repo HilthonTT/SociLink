@@ -41,7 +41,7 @@ export class CommentData implements ICommentData {
 
     let comments = this.cache.get(key) as Comment[];
 
-    if (comments === undefined) {
+    if (comments === undefined || comments === null) {
       const data = await getDocs(this.commentCollectionRef);
       comments = data.docs.map((doc) => ({
         ...(doc.data() as Comment),
