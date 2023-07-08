@@ -3,11 +3,7 @@ import { Thread } from "../models/thread";
 import { Category } from "../models/category";
 import { IThreadData, ThreadData } from "../data/threadData";
 import { CategoryData, ICategoryData } from "../data/categoryData";
-import {
-  AuthHelper,
-  IAuthHelper,
-  useAuthHelper,
-} from "../authentication/authHelper";
+import { useAuthHelper } from "../authentication/authHelper";
 import { useNavigate } from "react-router-dom";
 import { User } from "../models/user";
 
@@ -16,11 +12,10 @@ export const Home = () => {
 
   const threadData: IThreadData = new ThreadData();
   const categoryData: ICategoryData = new CategoryData();
-  const authHelper: IAuthHelper = new AuthHelper();
 
   const navigate = useNavigate();
 
-  const [user, setUser] = useState<User | null>(null);
+  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [threads, setThreads] = useState<Thread[] | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
 
@@ -40,7 +35,7 @@ export const Home = () => {
 
   const getUser = async () => {
     const user = await getUserFromAuth();
-    setUser(user);
+    setLoggedInUser(user);
   };
 
   useEffect(() => {

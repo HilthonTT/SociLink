@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { IThreadData, ThreadData } from "../data/threadData";
 import { useEffect, useState } from "react";
 import { Thread } from "../models/thread";
@@ -12,11 +12,12 @@ import { useAuthHelper } from "../authentication/authHelper";
 export const Details = () => {
   const { id } = useParams();
   const { getUserFromAuth } = useAuthHelper();
+  const navigate = useNavigate();
 
   const threadData: IThreadData = new ThreadData();
   const commentData: ICommentData = new CommentData();
 
-  const [user, setUser] = useState<User | null>(null);
+  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [thread, setThread] = useState<Thread | null>(null);
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [comment, setComment] = useState("");
@@ -45,7 +46,7 @@ export const Details = () => {
     }
 
     const basicThread = BasicThread.fromThread(thread as Thread);
-    const basicUser = BasicUser.fromUser(user as User);
+    const basicUser = BasicUser.fromUser(loggedInUser as User);
 
     const newComment = new Comment(comment, basicThread, basicUser);
     comments?.push(newComment);
@@ -56,7 +57,11 @@ export const Details = () => {
 
   const getUser = async () => {
     const user = await getUserFromAuth();
-    setUser(user);
+    setLoggedInUser(user);
+  };
+
+  const closePage = () => {
+    navigate("/");
   };
 
   useEffect(() => {

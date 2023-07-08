@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { CreateData } from "../form-models/createData";
 import { Category } from "../models/category";
-import { AuthHelper } from "../authentication/authHelper";
+import { useAuthHelper } from "../authentication/authHelper";
 import { CategoryData, ICategoryData } from "../data/categoryData";
 import { Thread } from "../models/thread";
 import { BasicUser } from "../models/basicUser";
@@ -14,14 +14,14 @@ import { User } from "../models/user";
 import { IImageData, ImageData } from "../data/imageData";
 
 export const Create = () => {
+  const { getUserFromAuth } = useAuthHelper();
+  const navigate = useNavigate();
+
   const threadData: IThreadData = new ThreadData();
   const categoryData: ICategoryData = new CategoryData();
   const imageData: IImageData = new ImageData();
 
-  const authHelper = new AuthHelper();
-  const navigate = useNavigate();
-
-  const user = authHelper.getAuthState();
+  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[] | null>();
   const [errorMessage, setErrorMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -48,24 +48,25 @@ export const Create = () => {
     resolver: yupResolver(schema),
   });
 
+  const getUser = async () => {
+    const user = await getUserFromAuth();
+    setLoggedInUser(user);
+  };
+
   const getCategoriesAsync = async () => {
     const categories = await categoryData.getCategoriesAsync();
     setCategories(categories);
   };
 
-  const closePage = () => {
-    navigate("/");
-  };
-
   const onCreateThreadAsync = async (data: CreateData) => {
     try {
       setErrorMessage("");
-      if (user === undefined || user === null) {
+      if (loggedInUser === undefined || loggedInUser === null) {
         setErrorMessage("You are not logged in.");
         return;
       }
 
-      const author = BasicUser.fromUser((await user) as User) as BasicUser;
+      const author = BasicUser.fromUser(loggedInUser as User) as BasicUser;
       const thread = new Thread(
         data.thread,
         data.description,
@@ -103,9 +104,17 @@ export const Create = () => {
     }
   };
 
+  const closePage = () => {
+    navigate("/");
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
   useEffect(() => {
     getCategoriesAsync();
-  }, [categories]);
+  }, []);
 
   return (
     <div>
@@ -140,7 +149,11 @@ export const Create = () => {
             {categories?.map((cat) => (
               <div>
                 <label>{cat.name}</label>
-                <input type="radio" value={cat.id} {...register("categoryId")} />
+                <input
+                  type="radio"
+                  value={cat.id}
+                  {...register("categoryId")}
+                />
               </div>
             ))}
           </div>
