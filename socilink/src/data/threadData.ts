@@ -20,7 +20,7 @@ export interface IThreadData {
   collectionName: string;
   getThreadsAsync: () => Promise<Thread[]>;
   getThreadAsync: (id: string) => Promise<Thread>;
-  getUserThreadAsync: (userId: string) => Promise<Thread>;
+  getUserThreadAsync: (userId: string) => Promise<Thread[]>;
   updateThreadAsync: (thread: Thread) => Promise<void>;
   createThreadAsync: (thread: Thread) => Promise<void>;
   updateVoteThreadAsync: (threadId: string, userId: string) => Promise<void>;
@@ -73,30 +73,27 @@ export class ThreadData implements IThreadData {
     return thread;
   };
 
-  public getUserThreadAsync = async (userId: string): Promise<Thread> => {
-    const key = `thread-${userId}`;
+  public getUserThreadAsync = async (userId: string): Promise<Thread[]> => {
+    const key = `threads-${userId}`;
 
-    let thread = this.cache.get(key) as Thread;
+    let threads = this.cache.get(key) as Thread[];
 
-    if (thread === undefined || thread === null) {
+    if (threads === undefined || threads === null) {
       const q = query(
-        this.threadCollectionRef,
+        collection(db, "threads"),
         where("author.id", "==", userId)
       );
       const querySnapshot = await getDocs(q);
 
-      if (querySnapshot.empty === false) {
-        const threadDoc = querySnapshot.docs[0];
-        thread = {
-          ...(threadDoc.data() as Thread),
-          id: threadDoc.id,
-        };
+      threads = querySnapshot.docs.map((threadDoc) => ({
+        ...(threadDoc.data() as Thread),
+        id: threadDoc.id,
+      }));
 
-        this.cache.set(key, thread);
-      }
+      this.cache.set(key, threads);
     }
 
-    return thread;
+    return threads;
   };
 
   public updateThreadAsync = async (thread: Thread): Promise<void> => {
