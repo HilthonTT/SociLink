@@ -7,11 +7,14 @@ import { Login } from "./pages/Login";
 import { Logout } from "./pages/Logout";
 import { Create } from "./pages/Create";
 import { Details } from "./pages/Details";
+import { Profile } from "./pages/Profile";
+import { Navbar } from "./Navbar";
 
 export const App = () => {
   return (
     <div>
       <Router>
+        <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/SampleData" element={<SampleData />} />
@@ -20,6 +23,7 @@ export const App = () => {
           <Route path="/Logout" element={<Logout />} />
           <Route path="/Create" element={<Create />} />
           <Route path="/Details/:id" element={<Details />} />
+          <Route path="/Profile/:id" element={<Profile />} />
         </Routes>
       </Router>
     </div>
