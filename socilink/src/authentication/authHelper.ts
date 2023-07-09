@@ -11,26 +11,25 @@ export const useAuthHelper = () => {
 
   const [user, setUser] = useState<User | null>(null);
 
+  const getUserFromAuth = async (): Promise<User | null> => {
+    return new Promise((resolve, reject) => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          const userFromAuth = await userData.getUserFromAuth(user.uid);
+          setUser(userFromAuth);
+          resolve(userFromAuth);
+        } else {
+          navigate("/Login");
+          setUser(null);
+          resolve(null);
+        }
+      });
+    });
+  };
+
   useEffect(() => {
     getUserFromAuth();
   }, []);
-
-  const getUserFromAuth = async (): Promise<User | null> => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userFromAuth = await userData.getUserFromAuth(
-          user?.uid as string
-        );
-
-        setUser(userFromAuth);
-      } else {
-        navigate("/Login");
-        setUser(null);
-      }
-    });
-
-    return user;
-  };
 
   return { getUserFromAuth };
 };
