@@ -16,6 +16,9 @@ export const Home = () => {
   const navigate = useNavigate();
 
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null
+  );
   const [threads, setThreads] = useState<Thread[] | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
 
@@ -31,6 +34,10 @@ export const Home = () => {
   const getCategoriesAsync = async () => {
     const categories = await categoryData.getCategoriesAsync();
     setCategories(categories);
+  };
+
+  const onCategoryClick = (category: Category) => {
+    setSelectedCategory(category);
   };
 
   const getUser = async () => {
@@ -61,7 +68,12 @@ export const Home = () => {
           ))}
       </div>
       <div>
-        {categories && categories.map((c) => <div key={c.id}>{c.name}</div>)}
+        {categories &&
+          categories.map((c) => (
+            <div key={c.id} onClick={() => onCategoryClick(c)}>
+              {c.name}
+            </div>
+          ))}
       </div>
     </div>
   );
