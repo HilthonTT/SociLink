@@ -1,0 +1,20 @@
+.root {
+    display: flex;
+    margin-top: 16px;
+}
+
+.category-list {
+    max-width: 200px;
+}
+
+.thread-container {
+    margin-left: 16px;
+}
+
+.thread-card {
+    margin-bottom: 16px;
+}
+
+.width-100 {
+    width: 100%;
+}

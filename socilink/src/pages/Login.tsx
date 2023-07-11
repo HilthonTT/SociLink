@@ -63,7 +63,7 @@ export const Login = () => {
 
   useEffect(() => {
     getAuthState();
-  }, [user]);
+  }, []);
 
   return (
     <div>

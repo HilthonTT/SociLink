@@ -9,12 +9,14 @@ import { Create } from "./pages/Create";
 import { Details } from "./pages/Details";
 import { Profile } from "./pages/Profile";
 import { Navbar } from "./Navbar";
+import { Container } from "@mui/material";
+import {} from "@mui/material/styles";
 
 export const App = () => {
   return (
-    <div>
-      <Router>
-        <Navbar />
+    <Router>
+      <Navbar />
+      <Container maxWidth="xl">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/SampleData" element={<SampleData />} />
@@ -25,7 +27,7 @@ export const App = () => {
           <Route path="/Details/:id" element={<Details />} />
           <Route path="/Profile/:id" element={<Profile />} />
         </Routes>
-      </Router>
-    </div>
+      </Container>
+    </Router>
   );
 };

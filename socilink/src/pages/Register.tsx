@@ -122,7 +122,7 @@ export const Register = () => {
 
   useEffect(() => {
     getAuthState();
-  }, [user]);
+  }, []);
 
   return (
     <div>

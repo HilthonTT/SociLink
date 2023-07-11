@@ -6,6 +6,19 @@ import { CategoryData, ICategoryData } from "../data/categoryData";
 import { useAuthHelper } from "../authentication/authHelper";
 import { useNavigate } from "react-router-dom";
 import { User } from "../models/user";
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardMedia,
+  Grid,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  Typography,
+} from "@mui/material";
 
 export const Home = () => {
   const { getUserFromAuth } = useAuthHelper();
@@ -58,23 +71,49 @@ export const Home = () => {
   }, []);
 
   return (
-    <div>
-      <div>
-        {threads &&
-          threads.map((t) => (
-            <div key={t.id} onClick={() => openDetails(t)}>
-              {t.thread}
-            </div>
+    <Grid container spacing={2}>
+      <Grid item xs={12} sm={3}>
+        <Paper elevation={2} className="categoryList">
+          <List component="nav">
+            {categories?.map((category) => (
+              <ListItem key={category.id}>
+                <ListItemText>{category.name}</ListItemText>
+              </ListItem>
+            ))}
+          </List>
+        </Paper>
+      </Grid>
+      <Grid item xs={12} sm={9}>
+        <div className="threadsContainer">
+          {threads?.map((thread) => (
+            <Card sx={{ maxWidth: 345 }}>
+              {thread.downloadUrl ? (
+                <CardMedia
+                  component="img"
+                  alt="green iguana"
+                  height="140"
+                  image={thread.downloadUrl}
+                />
+              ) : (
+                <CardMedia
+                  component="img"
+                  alt="green iguana"
+                  height="140"
+                  image="https://dummyimage.com/600x400/000/fff"
+                />
+              )}
+              <CardContent>
+                <Typography gutterBottom variant="h5" component="div">
+                  {thread.thread}
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <Button size="small">Learn More</Button>
+              </CardActions>
+            </Card>
           ))}
-      </div>
-      <div>
-        {categories &&
-          categories.map((c) => (
-            <div key={c.id} onClick={() => onCategoryClick(c)}>
-              {c.name}
-            </div>
-          ))}
-      </div>
-    </div>
+        </div>
+      </Grid>
+    </Grid>
   );
 };
