@@ -6,20 +6,23 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { CreateData } from "../form-models/createData";
 import { Category } from "../models/category";
-import { useAuthHelper } from "../authentication/authHelper";
 import { CategoryData, ICategoryData } from "../data/categoryData";
 import { Thread } from "../models/thread";
 import { BasicUser } from "../models/basicUser";
 import { User } from "../models/user";
 import { IImageData, ImageData } from "../data/imageData";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase/firebase";
+import { IUserData, UserData } from "../data/userData";
 
 export const Create = () => {
-  const { getUserFromAuth } = useAuthHelper();
+  const [user] = useAuthState(auth);
   const navigate = useNavigate();
 
   const threadData: IThreadData = new ThreadData();
   const categoryData: ICategoryData = new CategoryData();
   const imageData: IImageData = new ImageData();
+  const userData: IUserData = new UserData();
 
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[] | null>();
@@ -47,11 +50,6 @@ export const Create = () => {
   } = useForm<CreateData>({
     resolver: yupResolver(schema),
   });
-
-  const getUser = async () => {
-    const user = await getUserFromAuth();
-    setLoggedInUser(user);
-  };
 
   const getCategoriesAsync = async () => {
     const categories = await categoryData.getCategoriesAsync();
@@ -109,8 +107,15 @@ export const Create = () => {
   };
 
   useEffect(() => {
+    const getUser = async () => {
+      if (user) {
+        const u = await userData.getUserAsync(user.uid);
+        setLoggedInUser(u);
+      }
+    };
+
     getUser();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     getCategoriesAsync();

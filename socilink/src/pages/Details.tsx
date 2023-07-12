@@ -7,15 +7,18 @@ import { BasicThread } from "../models/basicThread";
 import { BasicUser } from "../models/basicUser";
 import { User } from "../models/user";
 import { CommentData, ICommentData } from "../data/commentData";
-import { useAuthHelper } from "../authentication/authHelper";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase/firebase";
+import { IUserData, UserData } from "../data/userData";
 
 export const Details = () => {
   const { id } = useParams();
-  const { getUserFromAuth } = useAuthHelper();
+  const [user] = useAuthState(auth);
   const navigate = useNavigate();
 
   const threadData: IThreadData = new ThreadData();
   const commentData: ICommentData = new CommentData();
+  const userData: IUserData = new UserData();
 
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [thread, setThread] = useState<Thread | null>(null);
@@ -55,18 +58,20 @@ export const Details = () => {
     setComment("");
   };
 
-  const getUser = async () => {
-    const user = await getUserFromAuth();
-    setLoggedInUser(user);
-  };
-
   const closePage = () => {
     navigate("/");
   };
 
   useEffect(() => {
+    const getUser = async () => {
+      if (user) {
+        const u = await userData.getUserAsync(user?.uid);
+        setLoggedInUser(u);
+      }
+    };
+
     getUser();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     getThreadAsync();

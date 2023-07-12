@@ -3,7 +3,6 @@ import { Thread } from "../models/thread";
 import { Category } from "../models/category";
 import { IThreadData, ThreadData } from "../data/threadData";
 import { CategoryData, ICategoryData } from "../data/categoryData";
-import { useAuthHelper } from "../authentication/authHelper";
 import { useNavigate } from "react-router-dom";
 import { User } from "../models/user";
 import {
@@ -19,12 +18,16 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase/firebase";
+import { IUserData, UserData } from "../data/userData";
 
 export const Home = () => {
-  const { getUserFromAuth } = useAuthHelper();
+  const [user] = useAuthState(auth);
 
   const threadData: IThreadData = new ThreadData();
   const categoryData: ICategoryData = new CategoryData();
+  const userData: IUserData = new UserData();
 
   const navigate = useNavigate();
 
@@ -53,14 +56,16 @@ export const Home = () => {
     setSelectedCategory(category);
   };
 
-  const getUser = async () => {
-    const user = await getUserFromAuth();
-    setLoggedInUser(user);
-  };
-
   useEffect(() => {
+    const getUser = async () => {
+      if (user) {
+        const u = await userData.getUserAsync(user.uid);
+        setLoggedInUser(u);
+      }
+    };
+
     getUser();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     getThreadsAsync();
@@ -86,7 +91,7 @@ export const Home = () => {
       <Grid item xs={12} sm={9}>
         <div className="threadsContainer">
           {threads?.map((thread) => (
-            <Card sx={{ maxWidth: 345 }}>
+            <Card key={thread.id} sx={{ maxWidth: 345 }}>
               {thread.downloadUrl ? (
                 <CardMedia
                   component="img"

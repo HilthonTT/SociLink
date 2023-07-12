@@ -2,44 +2,30 @@ import { useEffect, useState } from "react";
 import { User } from "../models/user";
 import { Thread } from "../models/thread";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuthHelper } from "../authentication/authHelper";
 import { IUserData, UserData } from "../data/userData";
 import { IThreadData, ThreadData } from "../data/threadData";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase/firebase";
 
 export const Profile = () => {
   const { id } = useParams();
-  const { getUserFromAuth } = useAuthHelper();
+  const [user] = useAuthState(auth);
 
   const userData: IUserData = new UserData();
   const threadData: IThreadData = new ThreadData();
   const navigate = useNavigate();
 
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [profileUser, setProfileUser] = useState<User | null>(null);
   const [threads, setThreads] = useState<Thread[] | null>(null);
 
-  const getUser = async () => {
-    const user = await getUserFromAuth();
-    setLoggedInUser(user);
-  };
-
-  const getProfileUser = async () => {
-    const user = await userData.getUserAsync(id as string);
-    setUser(user);
-  };
-
-  const getThreads = async () => {
-    const fetchedThreads = await threadData.getUserThreadAsync(id as string);
-    setThreads(fetchedThreads);
-  };
-
   const getThreadText = () => {
-    if (!user) {
+    if (!profileUser) {
       return "";
     }
 
-    const username = user?.displayName;
-    const threadCount = user?.authoredComments.length;
+    const username = profileUser?.displayName;
+    const threadCount = profileUser?.authoredComments.length;
 
     if (threadCount <= 0) {
       return `${username} has authored no threads.`;
@@ -55,24 +41,43 @@ export const Profile = () => {
   };
 
   useEffect(() => {
+    const getUser = async () => {
+      if (user) {
+        const u = await userData.getUserAsync(user.uid);
+        setLoggedInUser(u);
+      }
+    };
+
     getUser();
-  }, []);
+  }, [user, userData]);
 
   useEffect(() => {
+    const getProfileUser = async () => {
+      const user = await userData.getUserAsync(id as string);
+      setProfileUser(user);
+    };
+
     getProfileUser();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
+    const getThreads = async () => {
+      const fetchedThreads = await threadData.getUserThreadAsync(id as string);
+      setThreads(fetchedThreads);
+    };
+
     getThreads();
-  }, []);
+  }, [id]);
 
   return (
     <div>
       <div>
         <button onClick={closePage}>Close Page</button>
       </div>
-      <div>{user?.downloadUrl && <img src={user?.downloadUrl} />}</div>
-      <div>{user?.displayName}</div>
+      <div>
+        {profileUser?.downloadUrl && <img src={profileUser?.downloadUrl} />}
+      </div>
+      <div>{profileUser?.displayName}</div>
       <div>{getThreadText()}</div>
       <br />
       <hr />

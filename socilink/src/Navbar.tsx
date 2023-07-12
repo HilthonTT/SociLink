@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { User } from "./models/user";
-import { useAuthHelper } from "./authentication/authHelper";
 import { useNavigate } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -17,6 +16,9 @@ import {
   MenuItem,
   Tooltip,
 } from "@mui/material";
+import { IUserData, UserData } from "./data/userData";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "./firebase/firebase";
 
 enum Pages {
   Home,
@@ -30,7 +32,8 @@ enum SettingsPages {
 }
 
 export const Navbar = () => {
-  const { getUserFromAuth } = useAuthHelper();
+  const [user] = useAuthState(auth);
+  const userData: IUserData = new UserData();
   const navigate = useNavigate();
 
   const [loggedInUser, setLoggedInUser] = useState<User | null>();
@@ -50,12 +53,6 @@ export const Navbar = () => {
 
   const handleCloseUserMenu = (): void => {
     setAnchorElUser(null);
-  };
-
-  const getLoggedInUser = async (): Promise<void> => {
-    const u = await getUserFromAuth();
-    console.log(u?.displayName);
-    setLoggedInUser(u);
   };
 
   const loadProfilePage = (): void => {
@@ -132,8 +129,15 @@ export const Navbar = () => {
   };
 
   useEffect(() => {
+    const getLoggedInUser = async (): Promise<void> => {
+      if (user) {
+        const u = await userData.getUserAsync(user.uid);
+        setLoggedInUser(u);
+      }
+    };
+
     getLoggedInUser();
-  }, []);
+  }, [user, userData]);
 
   return (
     <AppBar position="static">
