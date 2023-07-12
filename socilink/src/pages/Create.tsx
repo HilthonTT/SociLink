@@ -115,7 +115,7 @@ export const Create = () => {
     };
 
     getUser();
-  }, [user]);
+  }, [user, userData]);
 
   useEffect(() => {
     getCategoriesAsync();

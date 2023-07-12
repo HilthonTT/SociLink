@@ -71,7 +71,7 @@ export const Details = () => {
     };
 
     getUser();
-  }, [user]);
+  }, [user, userData]);
 
   useEffect(() => {
     getThreadAsync();

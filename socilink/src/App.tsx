@@ -12,6 +12,7 @@ import { Navbar } from "./Navbar";
 import { Container } from "@mui/material";
 import {} from "@mui/material/styles";
 import { MyThreads } from "./pages/MyThreads";
+import { Account } from "./pages/Account";
 
 export const App = () => {
   return (
@@ -28,6 +29,7 @@ export const App = () => {
           <Route path="/Details/:id" element={<Details />} />
           <Route path="/Profile/:id" element={<Profile />} />
           <Route path="/MyThreads" element={<MyThreads />} />
+          <Route path="/Account" element={<Account />} />
         </Routes>
       </Container>
     </Router>

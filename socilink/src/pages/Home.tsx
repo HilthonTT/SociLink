@@ -65,7 +65,7 @@ export const Home = () => {
     };
 
     getUser();
-  }, [user]);
+  }, [user, userData]);
 
   useEffect(() => {
     getThreadsAsync();
