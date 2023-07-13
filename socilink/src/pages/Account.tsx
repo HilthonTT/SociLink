@@ -54,7 +54,7 @@ export const Account = () => {
   useEffect(() => {
     const getLoggedInUser = async () => {
       if (user) {
-        const u = await userData.getUserAsync(user?.uid);
+        const u = await userData.getUserFromAuth(user?.uid);
         setLoggedInUser(u);
       }
     };
@@ -64,7 +64,18 @@ export const Account = () => {
 
   return (
     <div>
-      <div></div>
+      <div>
+        <h1>Account</h1>
+      </div>
+      <div>
+        <div>Logged in: {loggedInUser?.displayName}</div>
+        <div>
+          Hello {loggedInUser?.firstName} {loggedInUser?.lastName}
+        </div>
+        <div>
+          You have posted {loggedInUser?.authoredThreads.length} threads.
+        </div>
+      </div>
     </div>
   );
 };

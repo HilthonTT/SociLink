@@ -131,7 +131,7 @@ export const Navbar = () => {
   useEffect(() => {
     const getLoggedInUser = async (): Promise<void> => {
       if (user) {
-        const u = await userData.getUserAsync(user.uid);
+        const u = await userData.getUserFromAuth(user.uid);
         setLoggedInUser(u);
       }
     };

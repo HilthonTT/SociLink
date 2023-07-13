@@ -43,7 +43,7 @@ export const Profile = () => {
   useEffect(() => {
     const getUser = async () => {
       if (user) {
-        const u = await userData.getUserAsync(user.uid);
+        const u = await userData.getUserFromAuth(user.uid);
         setLoggedInUser(u);
       }
     };
