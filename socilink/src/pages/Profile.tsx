@@ -85,7 +85,7 @@ export const Profile = () => {
       <div>
         <ul>
           {threads?.map((t) => (
-            <li>
+            <li key={t.id}>
               {t.thread} - {t.dateCreated.toDate().toUTCString()}
             </li>
           ))}

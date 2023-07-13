@@ -12,7 +12,7 @@ import { Navbar } from "./Navbar";
 import { Container } from "@mui/material";
 import {} from "@mui/material/styles";
 import { MyThreads } from "./pages/MyThreads";
-import { Account } from "./pages/Account";
+import { Account } from "./pages/Account/Account";
 
 export const App = () => {
   return (

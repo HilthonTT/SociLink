@@ -1,3 +1,5 @@
 export interface EmailResetData {
-  email: string;
+  currentEmail: string;
+  newEmail: string;
+  password: string;
 }
