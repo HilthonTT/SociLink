@@ -9,10 +9,23 @@ import { Create } from "./pages/Create";
 import { Details } from "./pages/Details";
 import { Profile } from "./pages/Profile";
 import { Navbar } from "./Navbar";
-import { Container } from "@mui/material";
+import { Box, Container, Link, Typography } from "@mui/material";
 import {} from "@mui/material/styles";
 import { MyThreads } from "./pages/MyThreads";
 import { Account } from "./pages/Account/Account";
+
+const Copyright = () => {
+  return (
+    <Typography variant="body2" color="text.secondary" align="center">
+      {"Copyright © "}
+      <Link color="inherit" href="https://mui.com/">
+        Socilink
+      </Link>{" "}
+      {new Date().getFullYear()}
+      {"."}
+    </Typography>
+  );
+};
 
 export const App = () => {
   return (
@@ -32,6 +45,20 @@ export const App = () => {
           <Route path="/Account" element={<Account />} />
         </Routes>
       </Container>
+      <Box sx={{ bgcolor: "background.paper", p: 6 }} component="footer">
+        <Typography variant="h6" align="center" gutterBottom>
+          SociLink
+        </Typography>
+        <Typography
+          variant="subtitle1"
+          align="center"
+          color="text.secondary"
+          component="p">
+          © {new Date().getFullYear()} SociLink Corporation. Socilink, is among
+          the registered and unregistered websites
+        </Typography>
+        <Copyright />
+      </Box>
     </Router>
   );
 };

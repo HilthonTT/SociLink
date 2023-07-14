@@ -5,19 +5,17 @@ import { IThreadData, ThreadData } from "../data/threadData";
 import { CategoryData, ICategoryData } from "../data/categoryData";
 import { useNavigate } from "react-router-dom";
 import { User } from "../models/user";
-import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardMedia,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  Typography,
-} from "@mui/material";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardActions from "@mui/material/CardActions";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
+import CssBaseline from "@mui/material/CssBaseline";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
 import { IUserData, UserData } from "../data/userData";
@@ -76,49 +74,85 @@ export const Home = () => {
   }, []);
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} sm={3}>
-        <Paper elevation={2} className="categoryList">
-          <List component="nav">
-            {categories?.map((category) => (
-              <ListItem key={category.id}>
-                <ListItemText>{category.name}</ListItemText>
-              </ListItem>
+    <div>
+      <CssBaseline />
+      <main>
+        {/* Hero unit */}
+        <Box
+          sx={{
+            bgcolor: "background.paper",
+            pt: 8,
+            pb: 6,
+          }}>
+          <Container maxWidth="lg">
+            <Typography
+              component="h1"
+              variant="h2"
+              align="center"
+              color="text.primary"
+              gutterBottom>
+              Threads
+            </Typography>
+            <Typography
+              variant="h5"
+              align="center"
+              color="text.secondary"
+              paragraph>
+              Welcome to the current threads page! Here, you'll find a
+              collection of ongoing discussions created by our diverse
+              community. Show respect for each post and engage in meaningful
+              conversations. Together, let's make this space a valuable hub of
+              ideas and insights.
+            </Typography>
+            <Stack
+              sx={{ pt: 4 }}
+              direction="row"
+              spacing={2}
+              justifyContent="center">
+              <Button variant="contained">Make a thread</Button>
+              <Button variant="outlined">My Threads</Button>
+            </Stack>
+          </Container>
+        </Box>
+        <Container sx={{ py: 8 }} maxWidth="md">
+          {/* End hero unit */}
+          <Grid container spacing={4}>
+            {threads?.map((thread) => (
+              <Grid item key={thread.id} xs={12} sm={6} md={4}>
+                <Card
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}>
+                  <CardMedia
+                    component="div"
+                    sx={{
+                      // 16:9
+                      pt: "56.25%",
+                    }}
+                    image={thread?.downloadUrl}
+                  />
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Typography gutterBottom variant="h5" component="h2">
+                      {thread.thread}
+                    </Typography>
+                    <Typography>{thread.description}</Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button size="small" onClick={() => openDetails(thread)}>
+                      View
+                    </Button>
+                    {loggedInUser?.id === (thread.author?.id as string) && (
+                      <Button size="small">Edit</Button>
+                    )}
+                  </CardActions>
+                </Card>
+              </Grid>
             ))}
-          </List>
-        </Paper>
-      </Grid>
-      <Grid item xs={12} sm={9}>
-        <div className="threadsContainer">
-          {threads?.map((thread) => (
-            <Card key={thread.id} sx={{ maxWidth: 345 }}>
-              {thread.downloadUrl ? (
-                <CardMedia
-                  component="img"
-                  alt="green iguana"
-                  height="140"
-                  image={thread.downloadUrl}
-                />
-              ) : (
-                <CardMedia
-                  component="img"
-                  alt="green iguana"
-                  height="140"
-                  image="https://dummyimage.com/600x400/000/fff"
-                />
-              )}
-              <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
-                  {thread.thread}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button size="small">Learn More</Button>
-              </CardActions>
-            </Card>
-          ))}
-        </div>
-      </Grid>
-    </Grid>
+          </Grid>
+        </Container>
+      </main>
+    </div>
   );
 };
