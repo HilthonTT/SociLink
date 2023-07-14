@@ -14,6 +14,19 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { RegistrationData } from "../form-models/registrationData";
 import { IImageData, ImageData } from "../data/imageData";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import CssBaseline from "@mui/material/CssBaseline";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import { Input } from "@mui/material";
 
 export const Register = () => {
   const userData: IUserData = new UserData();
@@ -100,6 +113,12 @@ export const Register = () => {
     }
   };
 
+  const handleButtonClick = () => {
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput) {
+      fileInput.click();
+    }
+  };
   const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const fetchedFile = event.target.files?.[0];
 
@@ -125,76 +144,126 @@ export const Register = () => {
   }, []);
 
   return (
-    <div>
-      {errorMessage && <div>{errorMessage}</div>}
-      <div>
-        <form onSubmit={handleSubmit(onRegistration)}>
-          <div>
-            <label id="profile-picture">Profile Picture</label>
-            <input type="file" onChange={onFileChange} />
-          </div>
-          <div>
-            <label id="first-name">First Name</label>
-            <input
-              id="first-name"
-              placeholder="Enter your first name"
-              {...register("firstName")}
-            />
-            {errors.firstName?.message}
-          </div>
-          <div>
-            <label id="last-name">Last Name</label>
-            <input
-              id="last-name"
-              placeholder="Enter your last name"
-              {...register("lastName")}
-            />
-            {errors.lastName?.message}
-          </div>
-          <div>
-            <label id="display-name">Display Name</label>
-            <input
-              id="display-name"
-              placeholder="Enter your display name"
-              {...register("displayName")}
-            />
-            {errors.displayName?.message}
-          </div>
-          <div>
-            <label id="email">Email Address</label>
-            <input
-              id="email"
-              type="email"
-              placeholder="Enter your email address"
-              {...register("email")}
-            />
-            {errors.email?.message}
-          </div>
-          <div>
-            <label id="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              {...register("password")}
-            />
-            {errors.password?.message}
-          </div>
-          <div>
-            <label id="confirm-password">Confirm Password</label>
-            <input
-              id="confirm-password"
-              type="password"
-              placeholder="Enter your password again to confirm"
-              {...register("confirmedPassword")}
-            />
-            {errors.confirmedPassword?.message}
-          </div>
-          <div>
-            <button type="submit">Register</button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <Box
+        sx={{
+          marginTop: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}>
+        {file ? (
+          <Avatar
+            sx={{ width: 100, height: 100 }}
+            src={URL.createObjectURL(file)}
+            alt="profile picture"
+          />
+        ) : (
+          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+            <LockOutlinedIcon />{" "}
+          </Avatar>
+        )}
+
+        <Typography component="h1" variant="h5">
+          Sign up
+        </Typography>
+        <Box
+          component="form"
+          noValidate
+          onSubmit={handleSubmit(onRegistration)}
+          sx={{ mt: 3 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <input
+                id="fileInput"
+                type="file"
+                style={{ display: "none" }}
+                onChange={onFileChange}
+              />
+              <Button
+                type="button"
+                fullWidth
+                variant="contained"
+                onClick={handleButtonClick}>
+                Upload profile picture
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                autoComplete="given-name"
+                required
+                fullWidth
+                id="firstName"
+                label="First Name"
+                autoFocus
+                {...register("firstName")}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                required
+                fullWidth
+                id="lastName"
+                label="Last Name"
+                autoComplete="family-name"
+                {...register("lastName")}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                id="displayName"
+                label="Display Name"
+                autoComplete="username"
+                {...register("displayName")}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                autoComplete="email"
+                {...register("email")}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="new-password"
+                {...register("password")}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={<Checkbox value="allowExtraEmails" color="primary" />}
+                label="I want to receive inspiration, marketing promotions and updates via email."
+              />
+            </Grid>
+          </Grid>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}>
+            Sign Up
+          </Button>
+          <Grid container justifyContent="flex-end">
+            <Grid item>
+              <Link href="#" variant="body2">
+                Already have an account? Sign in
+              </Link>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+    </Container>
   );
 };
