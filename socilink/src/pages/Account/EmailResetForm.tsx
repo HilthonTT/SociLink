@@ -9,9 +9,32 @@ import {
 } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
+import { useEffect, useState } from "react";
 
-export const EmailResetForm = () => {
+interface Props {
+  isOpen: boolean;
+  onClose: (isOpen: boolean) => void;
+}
+
+export const EmailResetForm = (props: Props) => {
+  const { isOpen, onClose } = props;
   const [user] = useAuthState(auth);
+
+  const [open, setOpen] = useState(isOpen);
+
+  const handleClose = () => {
+    setOpen(false);
+    onClose(false);
+  };
 
   const schema = yup.object().shape({
     currentEmail: yup
@@ -47,40 +70,64 @@ export const EmailResetForm = () => {
     await updateEmail(credential.user, data.newEmail);
 
     await sendEmailVerification(credential.user);
+
+    handleClose();
   };
 
+  useEffect(() => {
+    setOpen(isOpen);
+  }, [isOpen]);
+
   return (
-    <div>
-      <h2>Reset Email</h2>
+    <Dialog open={open} onClose={handleClose}>
       <form onSubmit={handleSubmit(handleEmailReset)}>
-        <div>
-          <label htmlFor="email">Current Email</label>
-          <div>Enter your current email address.</div>
-          {errors?.currentEmail && (
-            <div style={{ color: "red" }}>{errors.currentEmail.message}</div>
-          )}
-          <input type="text" id="email" {...register("currentEmail")} />
-        </div>
-        <div>
-          <label htmlFor="new-email">New Email</label>
-          <div>Enter your new email address.</div>
-          {errors?.newEmail && (
-            <div style={{ color: "red" }}>{errors.newEmail.message}</div>
-          )}
-          <input type="text" id="new-email" {...register("newEmail")} />
-        </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <div>Enter your password.</div>
-          {errors?.password && (
-            <div style={{ color: "red" }}>{errors.password.message}</div>
-          )}
-          <input type="password" id="password" {...register("password")} />
-        </div>
-        <div>
-          <button type="submit">Submit</button>
-        </div>
+        <DialogTitle>Reset Email</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You must enter your credential to reset your email address.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Current Email Address"
+            type="email"
+            fullWidth
+            variant="standard"
+            required
+            helperText="Please enter your correct current email address."
+            {...register("currentEmail")}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="New Email Address"
+            type="email"
+            fullWidth
+            variant="standard"
+            required
+            helperText="Please a correct email address."
+            {...register("newEmail")}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Password"
+            type="password"
+            fullWidth
+            variant="standard"
+            required
+            helperText="Please enter your current password."
+            {...register("password")}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button type="submit">Reset Email</Button>
+        </DialogActions>
       </form>
-    </div>
+    </Dialog>
   );
 };
