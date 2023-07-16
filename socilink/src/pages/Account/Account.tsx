@@ -1,6 +1,6 @@
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../firebase/firebase";
-import { SyntheticEvent, useEffect, useState } from "react";
+import { ReactNode, SyntheticEvent, useEffect, useState } from "react";
 import { User } from "../../models/user";
 import { IUserData, UserData } from "../../data/userData";
 import { EmailResetForm } from "./EmailResetForm";
@@ -18,7 +18,7 @@ import { AccountBox, ModeEdit } from "@mui/icons-material";
 import { AlertPasswordDialog } from "./AlertPasswordDialog";
 
 interface TabPanelProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   index: number;
   value: number;
 }

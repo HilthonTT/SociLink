@@ -152,7 +152,7 @@ export const Create = () => {
           <div>
             <label>Select a category.</label>
             {categories?.map((cat) => (
-              <div>
+              <div key={cat.id}>
                 <label>{cat.name}</label>
                 <input
                   type="radio"

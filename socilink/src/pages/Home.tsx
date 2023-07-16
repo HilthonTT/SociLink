@@ -40,6 +40,14 @@ export const Home = () => {
     navigate(`Details/${thread.id}`);
   };
 
+  const loadMyThreadsPage = () => {
+    navigate("/MyThreads");
+  };
+
+  const loadCreatePage = () => {
+    navigate("/Create");
+  };
+
   const getThreadsAsync = async () => {
     const threads = await threadData.getThreadsAsync();
     setThreads(threads);
@@ -77,7 +85,6 @@ export const Home = () => {
     <div>
       <CssBaseline />
       <main>
-        {/* Hero unit */}
         <Box
           sx={{
             bgcolor: "background.paper",
@@ -109,13 +116,16 @@ export const Home = () => {
               direction="row"
               spacing={2}
               justifyContent="center">
-              <Button variant="contained">Make a thread</Button>
-              <Button variant="outlined">My Threads</Button>
+              <Button variant="contained" onClick={loadCreatePage}>
+                Make a thread
+              </Button>
+              <Button variant="outlined" onClick={loadMyThreadsPage}>
+                My Threads
+              </Button>
             </Stack>
           </Container>
         </Box>
         <Container sx={{ py: 8 }} maxWidth="md">
-          {/* End hero unit */}
           <Grid container spacing={4}>
             {threads?.map((thread) => (
               <Grid item key={thread.id} xs={12} sm={6} md={4}>
