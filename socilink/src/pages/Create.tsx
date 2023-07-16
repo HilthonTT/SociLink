@@ -14,6 +14,22 @@ import { IImageData, ImageData } from "../data/imageData";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
 import { IUserData, UserData } from "../data/userData";
+import {
+  Avatar,
+  Box,
+  Button,
+  Container,
+  CssBaseline,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Create as CreateIcon } from "@mui/icons-material";
 
 export const Create = () => {
   const [user] = useAuthState(auth);
@@ -28,6 +44,7 @@ export const Create = () => {
   const [categories, setCategories] = useState<Category[] | null>();
   const [errorMessage, setErrorMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [categoryId, setCategoryId] = useState("");
 
   const schema = yup.object().shape({
     thread: yup
@@ -40,7 +57,6 @@ export const Create = () => {
       .required("You cannot creata a thread without a description.")
       .min(5, "Your description must be at least 5 characters long.")
       .max(500, "Your description must not be above 500 characters long."),
-    categoryId: yup.string().min(1).required("You must select a category."),
   });
 
   const {
@@ -50,6 +66,17 @@ export const Create = () => {
   } = useForm<CreateData>({
     resolver: yupResolver(schema),
   });
+
+  const handleButtonClick = () => {
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput) {
+      fileInput.click();
+    }
+  };
+
+  const onCategoryChange = (event: SelectChangeEvent) => {
+    setCategoryId(event.target.value);
+  };
 
   const getCategoriesAsync = async () => {
     const categories = await categoryData.getCategoriesAsync();
@@ -74,11 +101,11 @@ export const Create = () => {
       );
 
       thread.category = categories?.find(
-        (c) => c.id === data.categoryId
+        (c) => c.id === categoryId
       ) as Category;
 
       if (thread.category === null || thread.category === undefined) {
-        data.categoryId = "";
+        setCategoryId("");
         return;
       }
 
@@ -122,51 +149,97 @@ export const Create = () => {
   }, []);
 
   return (
-    <div>
-      <div>
-        <div>{errorMessage && <div>{errorMessage}</div>}</div>
-      </div>
-      <div>
-        <form onSubmit={handleSubmit(onCreateThreadAsync)}>
-          <div>
-            <label htmlFor="photo">Photo</label>
-            <div>
-              Select a photo related to your thread. This isn't required.
-            </div>
-            <input type="file" onChange={onFileChange} />
-          </div>
-          <div>
-            <label htmlFor="thread">Thread</label>
-            <div>Please sum up your entire thread.</div>
-            <input type="text" id="thread" {...register("thread")} />
-          </div>
-          <div>
-            <label htmlFor="description">Description</label>
-            <div>Describe your thread, explain what it's about.</div>
-            <textarea
-              typeof="text"
-              id="description"
-              {...register("description")}
-            />
-          </div>
-          <div>
-            <label>Select a category.</label>
-            {categories?.map((cat) => (
-              <div key={cat.id}>
-                <label>{cat.name}</label>
-                <input
-                  type="radio"
-                  value={cat.id}
-                  {...register("categoryId")}
-                />
-              </div>
-            ))}
-          </div>
-          <div>
-            <button type="submit">Create</button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <Box
+        sx={{
+          marginTop: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}>
+        {file ? (
+          <Avatar
+            sx={{ width: 100, height: 100 }}
+            src={URL.createObjectURL(file)}
+            alt="profile picture"
+          />
+        ) : (
+          <Avatar
+            sx={{ m: 1, bgcolor: "primary.main", width: 100, height: 100 }}>
+            <CreateIcon sx={{ width: 50, height: 50 }} />{" "}
+          </Avatar>
+        )}
+        <Typography component="h1" variant="h5">
+          Make a Thread
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={handleSubmit(onCreateThreadAsync)}
+          sx={{ mt: 3 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <input
+                id="fileInput"
+                type="file"
+                style={{ display: "none" }}
+                onChange={onFileChange}
+              />
+              <Button
+                type="button"
+                fullWidth
+                variant="contained"
+                onClick={handleButtonClick}>
+                Upload picture
+              </Button>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                id="thread-title"
+                label="Thread"
+                helperText="Summarize your thread in less than 75 characters."
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                id="thread-description"
+                label="Description"
+                helperText="Describe your thread in less than 500 characters"
+                multiline
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl variant="standard" fullWidth>
+                <InputLabel id="demo-simple-select-standard-label">
+                  Category
+                </InputLabel>
+                <Select
+                  labelId="demo-simple-select-standard-label"
+                  id="demo-simple-select-standard"
+                  label="Category"
+                  value={categoryId}
+                  onChange={onCategoryChange}
+                  fullWidth>
+                  {categories?.map((cat) => (
+                    <MenuItem value={cat.id}>{cat.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}>
+            Create
+          </Button>
+        </Box>
+      </Box>
+    </Container>
   );
 };

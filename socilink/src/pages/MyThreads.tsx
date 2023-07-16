@@ -7,7 +7,6 @@ import { auth } from "../firebase/firebase";
 import { IUserData, UserData } from "../data/userData";
 import {
   Autocomplete,
-  Avatar,
   Box,
   Button,
   Card,
