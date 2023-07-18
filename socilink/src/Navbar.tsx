@@ -28,7 +28,6 @@ enum Pages {
 enum SettingsPages {
   Profile,
   Account,
-  Logout,
 }
 
 export const Navbar = () => {
@@ -71,6 +70,10 @@ export const Navbar = () => {
     navigate("/Logout");
   };
 
+  const loadLoginPage = (): void => {
+    navigate("/Login");
+  };
+
   const loadAccountPage = (): void => {
     navigate("/Account");
   };
@@ -92,8 +95,8 @@ export const Navbar = () => {
         return "Profile";
       case SettingsPages.Account:
         return "Account";
-      case SettingsPages.Logout:
-        return "Logout";
+      default:
+        return "";
     }
   };
 
@@ -112,6 +115,22 @@ export const Navbar = () => {
     handleCloseNavMenu();
   };
 
+  const loadAuthPage = (): void => {
+    if (user) {
+      loadLogoutPage();
+    } else {
+      loadLoginPage();
+    }
+  };
+
+  const getAuthPageName = (): string => {
+    if (user) {
+      return "Logout";
+    } else {
+      return "Login";
+    }
+  };
+
   const loadSettingPages = (page: SettingsPages): void => {
     switch (page) {
       case SettingsPages.Profile:
@@ -119,9 +138,6 @@ export const Navbar = () => {
         break;
       case SettingsPages.Account:
         loadAccountPage();
-        break;
-      case SettingsPages.Logout:
-        loadLogoutPage();
         break;
     }
 
@@ -267,6 +283,9 @@ export const Navbar = () => {
                   </MenuItem>
                 );
               })}
+              <MenuItem onClick={loadAuthPage}>
+                <Typography textAlign="center">{getAuthPageName()}</Typography>
+              </MenuItem>
             </Menu>
           </Box>
         </Toolbar>
