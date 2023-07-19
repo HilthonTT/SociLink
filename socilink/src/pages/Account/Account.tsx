@@ -1,6 +1,6 @@
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../firebase/firebase";
-import { ReactNode, SyntheticEvent, useEffect, useState } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 import { User } from "../../models/user";
 import { IUserData, UserData } from "../../data/userData";
 import { EmailResetForm } from "./EmailResetForm";
@@ -16,38 +16,7 @@ import {
 } from "@mui/material";
 import { AccountBox, ModeEdit } from "@mui/icons-material";
 import { AlertPasswordDialog } from "./AlertPasswordDialog";
-
-interface TabPanelProps {
-  children?: ReactNode;
-  index: number;
-  value: number;
-}
-
-const CustomTabPanel = (props: TabPanelProps) => {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}>
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-};
-
-function a11yProps(index: number) {
-  return {
-    id: `account-tab-${index}`,
-    "aria-controls": `account-tabpanel-${index}`,
-  };
-}
+import { CustomTabPanel, a11yProps } from "../../components/CustomTabPanel";
 
 export const Account = () => {
   const [user] = useAuthState(auth);

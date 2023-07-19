@@ -26,7 +26,6 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { Input } from "@mui/material";
 
 export const Register = () => {
   const userData: IUserData = new UserData();
@@ -239,6 +238,17 @@ export const Register = () => {
                 id="password"
                 autoComplete="new-password"
                 {...register("password")}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                required
+                fullWidth
+                label="Confirm Password"
+                type="password"
+                id="confirmed-password"
+                autoComplete="confirmed-password"
+                {...register("confirmedPassword")}
               />
             </Grid>
             <Grid item xs={12}>

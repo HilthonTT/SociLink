@@ -6,7 +6,7 @@ import { Register } from "./pages/Register";
 import { Login } from "./pages/Login";
 import { Logout } from "./pages/Logout";
 import { Create } from "./pages/Create";
-import { Details } from "./pages/Details";
+import { Details } from "./pages/Details/Details";
 import { Profile } from "./pages/Profile";
 import { Navbar } from "./Navbar";
 import { Box, Container, Link, Typography } from "@mui/material";
