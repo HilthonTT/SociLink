@@ -101,6 +101,6 @@ export class UserData implements IUserData {
 
   public updateUser = async (user: User): Promise<void> => {
     const userDoc = doc(db, this.collectionName, user.id);
-    await updateDoc(userDoc, { user });
+    await updateDoc(userDoc, { ...user });
   };
 }

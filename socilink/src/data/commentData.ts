@@ -56,7 +56,7 @@ export class CommentData implements ICommentData {
 
   public updateCommentAsync = async (comment: Comment): Promise<void> => {
     const commentDoc = doc(db, this.collectionName, comment.id);
-    await updateDoc(commentDoc, { comment });
+    await updateDoc(commentDoc, { ...comment });
   };
 
   public createCommentAsync = async (comment: Comment): Promise<void> => {

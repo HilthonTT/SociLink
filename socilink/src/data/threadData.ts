@@ -98,7 +98,7 @@ export class ThreadData implements IThreadData {
 
   public updateThreadAsync = async (thread: Thread): Promise<void> => {
     const threadDoc = doc(db, this.collectionName, thread.id);
-    await updateDoc(threadDoc, { thread });
+    await updateDoc(threadDoc, { ...thread });
   };
 
   public createThreadAsync = async (thread: Thread): Promise<void> => {
