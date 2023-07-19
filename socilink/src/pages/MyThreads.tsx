@@ -34,7 +34,7 @@ export const MyThreads = () => {
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
 
   const openDetails = (thread: Thread) => {
-    navigate(`Details/${thread.id}`);
+    navigate(`/Details/${thread.id}`);
   };
 
   const filterThreads = (searchText: string) => {

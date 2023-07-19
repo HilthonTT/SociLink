@@ -1,12 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { IThreadData, ThreadData } from "../data/threadData";
-import {
-  Fragment,
-  ReactNode,
-  SyntheticEvent,
-  useEffect,
-  useState,
-} from "react";
+import { ReactNode, SyntheticEvent, useEffect, useState } from "react";
 import { Thread } from "../models/thread";
 import { Comment } from "../models/comment";
 import { BasicThread } from "../models/basicThread";
@@ -23,12 +17,14 @@ import {
   Card,
   CardActions,
   CardContent,
-  Checkbox,
   Container,
   CssBaseline,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
-  FormControlLabel,
-  Grid,
   IconButton,
   InputAdornment,
   Tab,
@@ -73,7 +69,6 @@ function a11yProps(index: number) {
 export const Details = () => {
   const { id } = useParams();
   const [user] = useAuthState(auth);
-  const navigate = useNavigate();
 
   const threadData: IThreadData = new ThreadData();
   const commentData: ICommentData = new CommentData();
@@ -85,6 +80,10 @@ export const Details = () => {
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [comment, setComment] = useState("");
   const [value, setValue] = useState(0);
+  const [threadFormOpen, setThreadFormOpen] = useState(false);
+  const [DescriptionFormOpen, setDescriptionFormOpen] = useState(false);
+  const [newThread, setNewThread] = useState("");
+  const [newDescription, setNewDescription] = useState("");
 
   const getThreadAsync = async () => {
     const fetchedThread = await threadData.getThreadAsync(id as string);
@@ -94,6 +93,8 @@ export const Details = () => {
     }
 
     setThread(fetchedThread);
+    setNewThread(fetchedThread.thread);
+    setNewDescription(fetchedThread.description);
   };
 
   const handleValueChange = (event: SyntheticEvent, newValue: number) => {
@@ -123,8 +124,32 @@ export const Details = () => {
     setComment("");
   };
 
-  const closePage = () => {
-    navigate("/");
+  const saveNewThread = async () => {
+    if (newThread === "" || newThread.length > 75) {
+      return;
+    }
+
+    const t = thread as Thread;
+    t.thread = newThread;
+
+    setThread(t);
+    await threadData.updateThreadAsync(t);
+    setNewThread("");
+    setThreadFormOpen(false);
+  };
+
+  const saveNewDescription = async () => {
+    if (newDescription === "" || newDescription.length > 500) {
+      return;
+    }
+
+    const t = thread as Thread;
+    t.description = newDescription;
+
+    setThread(t);
+    await threadData.updateThreadAsync(t);
+    setNewDescription("");
+    setDescriptionFormOpen(false);
   };
 
   useEffect(() => {
@@ -150,6 +175,7 @@ export const Details = () => {
     <Container>
       <CssBaseline />
       <Box
+        component="div"
         sx={{
           borderBottom: 1,
           borderColor: "divider",
@@ -192,26 +218,37 @@ export const Details = () => {
           sx={{ textTransform: "uppercase", fontWeight: "bold" }}>
           Thread Information
         </Typography>
-        <Box sx={{ justifyContent: "space-between", display: "flex" }}>
+        <Box
+          component="div"
+          sx={{ justifyContent: "space-between", display: "flex" }}>
           <Typography component="div" variant="h6">
             Thread name: {thread?.thread}
           </Typography>
           {thread?.author.id === loggedInUser?.id && (
-            <Button startIcon={<ModeEdit />} />
+            <Button
+              onClick={() => setThreadFormOpen(true)}
+              startIcon={<ModeEdit />}
+            />
           )}
         </Box>
-        <Box sx={{ justifyContent: "space-between", display: "flex" }}>
+        <Box
+          component="div"
+          sx={{ justifyContent: "space-between", display: "flex" }}>
           <Typography component="div" variant="h6">
             Author: {thread?.author.displayName}
           </Typography>
         </Box>
-        <Box sx={{ justifyContent: "space-between", display: "flex" }}>
+        <Box
+          component="div"
+          sx={{ justifyContent: "space-between", display: "flex" }}>
           <Typography component="div" variant="h6">
             Date Posted: {thread?.dateCreated.toDate().toLocaleDateString()}
           </Typography>
         </Box>
         <Divider sx={{ borderWidth: 2 }} />
-        <Box sx={{ justifyContent: "space-between", display: "flex" }}>
+        <Box
+          component="div"
+          sx={{ justifyContent: "space-between", display: "flex" }}>
           <Typography
             component="div"
             variant="h6"
@@ -219,7 +256,10 @@ export const Details = () => {
             {thread?.description}
           </Typography>
           {thread?.author.id === loggedInUser?.id && (
-            <Button startIcon={<ModeEdit />} />
+            <Button
+              onClick={() => setDescriptionFormOpen(true)}
+              startIcon={<ModeEdit />}
+            />
           )}
         </Box>
         <Typography></Typography>
@@ -264,6 +304,60 @@ export const Details = () => {
           ))}
         </Box>
       </CustomTabPanel>
+
+      <Dialog open={threadFormOpen} onClose={() => setThreadFormOpen(false)}>
+        <DialogTitle>Edit Thread</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Edit your current thread. Everybody will be able see this change. If
+            your thread is larger than 75 characters, the changes won't save.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="new-thread"
+            label="New Thread"
+            type="text"
+            fullWidth
+            variant="standard"
+            defaultValue={newThread}
+            onChange={(e) => setNewThread(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setThreadFormOpen(false)}>Cancel</Button>
+          <Button onClick={saveNewThread}>Save Changes</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={DescriptionFormOpen}
+        onClose={() => setDescriptionFormOpen(false)}>
+        <DialogTitle>Edit Thread</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Edit your current description. Everybody will be able see this
+            change. If your description is larger than 500 characters, the
+            changes won't save.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="new-thread"
+            label="New Thread"
+            type="text"
+            fullWidth
+            variant="standard"
+            multiline
+            defaultValue={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDescriptionFormOpen(false)}>Cancel</Button>
+          <Button onClick={saveNewDescription}>Save Changes</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
