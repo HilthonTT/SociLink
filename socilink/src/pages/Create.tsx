@@ -86,7 +86,7 @@ export const Create = () => {
   const onCreateThreadAsync = async (data: CreateData) => {
     try {
       setErrorMessage("");
-      if (loggedInUser === undefined || loggedInUser === null) {
+      if (!loggedInUser) {
         setErrorMessage("You are not logged in.");
         return;
       }
@@ -104,7 +104,7 @@ export const Create = () => {
         (c) => c.id === categoryId
       ) as Category;
 
-      if (thread.category === null || thread.category === undefined) {
+      if (!thread.category) {
         setCategoryId("");
         return;
       }
@@ -200,6 +200,7 @@ export const Create = () => {
                 id="thread-title"
                 label="Thread"
                 helperText="Summarize your thread in less than 75 characters."
+                {...register("thread")}
               />
             </Grid>
             <Grid item xs={12}>
@@ -210,6 +211,7 @@ export const Create = () => {
                 label="Description"
                 helperText="Describe your thread in less than 500 characters"
                 multiline
+                {...register("description")}
               />
             </Grid>
             <Grid item xs={12}>
@@ -225,7 +227,9 @@ export const Create = () => {
                   onChange={onCategoryChange}
                   fullWidth>
                   {categories?.map((cat) => (
-                    <MenuItem value={cat.id}>{cat.name}</MenuItem>
+                    <MenuItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
