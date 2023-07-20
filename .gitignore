@@ -397,3 +397,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 socilink/src/appsettings.json
+backend/config/appsettings_dev.json
