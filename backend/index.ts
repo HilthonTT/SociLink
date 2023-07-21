@@ -1,9 +1,11 @@
 import mongoose, { ConnectOptions } from "mongoose";
 import threadRoute from "./routes/ThreadRoute";
-
-const express = require("express");
-const cors = require("cors");
-const appSettings: AppSettings = require("./config/appsettings_dev.json");
+import userRoute from "./routes/UserRoute";
+import categoryRoute from "./routes/CategoryRoute";
+import commentRoute from "./routes/CommentRoute";
+import express from "express";
+import cors from "cors";
+const appSettings = require("./config/appsettings_dev.json");
 
 interface AppSettings {
   mongoDb: {
@@ -12,10 +14,10 @@ interface AppSettings {
   };
 }
 
-const settings = appSettings as AppSettings;
-
 const app = express();
+const settings = appSettings as AppSettings;
 const port = 3001;
+const apiUrl = "/api";
 
 app.use(express.json());
 app.use(cors());
@@ -36,7 +38,10 @@ async function connectToMongoDB() {
 }
 connectToMongoDB();
 
-app.use("/api", threadRoute);
+app.use(apiUrl, threadRoute);
+app.use(apiUrl, userRoute);
+app.use(apiUrl, categoryRoute);
+app.use(apiUrl, commentRoute);
 
 app.listen(port, () => {
   console.log("Server running on port 3001");
