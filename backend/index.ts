@@ -1,4 +1,5 @@
 import mongoose, { ConnectOptions } from "mongoose";
+import threadRoute from "./routes/ThreadRoute";
 
 const express = require("express");
 const cors = require("cors");
@@ -34,6 +35,8 @@ async function connectToMongoDB() {
   }
 }
 connectToMongoDB();
+
+app.use("/api", threadRoute);
 
 app.listen(port, () => {
   console.log("Server running on port 3001");
