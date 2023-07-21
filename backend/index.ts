@@ -1,7 +1,7 @@
+import mongoose, { ConnectOptions } from "mongoose";
+
 const express = require("express");
 const cors = require("cors");
-
-import mongoose, { ConnectOptions } from "mongoose";
 const appSettings: AppSettings = require("./config/appsettings_dev.json");
 
 interface AppSettings {
