@@ -1,50 +1,45 @@
-import { addDoc, collection, doc, getDocs, setDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase";
-import { LRUCache } from "lru-cache";
 import { Category } from "../models/category";
+import appsettings from "../appsettings.json";
+import axios from "axios";
 
 export interface ICategoryData {
-  collectionName: string;
   getCategoriesAsync: () => Promise<Category[]>;
   createCategoryAsync: (category: Category) => Promise<void>;
 }
 
 export class CategoryData implements ICategoryData {
-  public readonly collectionName = "categories";
-
-  private readonly cacheName = "CategoryData";
-  private readonly cachedTime = 60 * 60 * 1000; // in ms: 1 hour;
-  private readonly categoryCollectionRef = collection(db, this.collectionName);
-
-  private readonly cacheOption = {
-    ttl: this.cachedTime,
-    ttlAutopurge: true,
-  };
-
-  private readonly cache = new LRUCache(this.cacheOption);
+  private readonly CACHE_KEY = "cached_categories";
+  private readonly EXPIRATION_TIME = 60 * 60 * 1000;
+  private readonly url = appsettings.api.url;
 
   public getCategoriesAsync = async (): Promise<Category[]> => {
-    let categories = this.cache.get(this.cacheName) as Category[];
+    try {
+      const cachedData = localStorage.getItem(this.CACHE_KEY);
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const currentTime = new Date().getTime();
+        if (currentTime - timestamp < this.EXPIRATION_TIME) {
+          return data;
+        }
+      }
 
-    if (categories === undefined || categories === null) {
-      const data = await getDocs(this.categoryCollectionRef);
-      categories = data.docs.map((doc) => ({
-        ...(doc.data() as Category),
-        id: doc.id,
-      }));
+      const response = await axios.get(`${this.url}/users`);
+      const categories: Category[] = response.data;
 
-      this.cache.set(this.cacheName, categories);
+      const dataToCache = {
+        data: categories,
+        timestamp: new Date().getTime(),
+      };
+      localStorage.setItem(this.CACHE_KEY, JSON.stringify(dataToCache));
+
+      return categories;
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      throw error;
     }
-
-    return categories;
   };
 
   public createCategoryAsync = async (category: Category): Promise<void> => {
-    const categoryDocRef = await addDoc(this.categoryCollectionRef, {
-      ...category,
-    });
-    category.id = categoryDocRef.id;
-    const categoryObject = { ...category };
-    await setDoc(doc(db, categoryDocRef.path), categoryObject);
+    await axios.post(`${this.url}/comments`, category);
   };
 }

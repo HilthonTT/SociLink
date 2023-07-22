@@ -36,4 +36,26 @@ router.post("/comments", async (req: Request, res: Response) => {
   }
 });
 
+router.put("/comments/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { comment } = req.body;
+
+    const updatedComment = await CommentModel.findByIdAndUpdate(
+      id,
+      { comment },
+      { new: true }
+    );
+
+    if (!updatedComment) {
+      return res.status(404).json({ error: "Comment not found" });
+    }
+
+    res.json(updatedComment);
+  } catch (error) {
+    console.error("Error updating comment:", error);
+    res.status(500).json({ error: "Error updating comment" });
+  }
+});
+
 export default router;

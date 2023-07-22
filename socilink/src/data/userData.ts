@@ -1,20 +1,8 @@
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  setDoc,
-  updateDoc,
-  where,
-} from "firebase/firestore";
-import { db } from "../firebase/firebase";
 import { User } from "../models/user";
-import { LRUCache } from "lru-cache";
+import axios from "axios";
+import appsettings from "../appsettings.json";
 
 export interface IUserData {
-  collectionName: string;
   getUsersAsync: () => Promise<User[]>;
   getUserAsync: (id: string) => Promise<User>;
   getUserFromAuth: (objectId: string) => Promise<User>;
@@ -23,84 +11,101 @@ export interface IUserData {
 }
 
 export class UserData implements IUserData {
-  public readonly collectionName = "users";
-
-  private readonly cacheName = "UserData";
-  private readonly cachedTime = 60 * 60 * 1000; // in ms: 1 hour
-  private readonly userCollectionRef = collection(db, this.collectionName);
-
-  private readonly cacheOptions = {
-    ttl: this.cachedTime,
-    ttlAutopurge: true,
-  };
-
-  private readonly cache = new LRUCache(this.cacheOptions);
+  private readonly CACHE_KEY_PREFIX = "cached_user_";
+  private readonly CACHE_KEY = "cached_users";
+  private readonly EXPIRATION_TIME = 60 * 60 * 1000; // 1 hour in millisecond
+  private readonly url = appsettings.api.url;
 
   public getUsersAsync = async (): Promise<User[]> => {
-    let users = this.cache.get(this.cacheName) as User[];
+    try {
+      const cachedData = localStorage.getItem(this.CACHE_KEY);
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const currentTime = new Date().getTime();
+        if (currentTime - timestamp < this.EXPIRATION_TIME) {
+          return data;
+        }
+      }
 
-    if (users === undefined) {
-      const data = await getDocs(this.userCollectionRef);
-      users = data.docs.map((doc) => ({
-        ...(doc.data() as User),
-        id: doc.id,
-      }));
+      const response = await axios.get(`${this.url}/users`);
+      const users: User[] = response.data;
 
-      this.cache.set(this.cacheName, users);
+      const dataToCache = {
+        data: users,
+        timestamp: new Date().getTime(),
+      };
+      localStorage.setItem(this.CACHE_KEY, JSON.stringify(dataToCache));
+
+      return users;
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      throw error;
     }
-
-    return users;
   };
 
   public getUserAsync = async (id: string): Promise<User> => {
-    const key = `user-${id}`;
-    let user = this.cache.get(key) as User;
+    try {
+      const cacheKey = `${this.CACHE_KEY_PREFIX}${id}`;
 
-    if (user === undefined || user === null) {
-      const userDoc = doc(db, this.collectionName, id);
-      const data = await getDoc(userDoc);
-      user = data.data() as User;
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const currentTime = new Date().getTime();
+        if (currentTime - timestamp < this.EXPIRATION_TIME) {
+          return data;
+        }
+      }
 
-      this.cache.set(key, user);
+      const response = await axios.get(`${this.url}/users/${id}`);
+      const user: User = response.data;
+
+      const dataToCache = {
+        data: user,
+        timestamp: new Date().getTime(),
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+
+      return user;
+    } catch (error) {
+      console.error(`Error fetching user with ID ${id}:`, error);
+      throw error;
     }
-
-    return user;
   };
 
   getUserFromAuth = async (objectId: string): Promise<User> => {
-    const key = `user-${objectId}`;
-    let user = this.cache.get(key) as User;
+    try {
+      const cacheKey = `${this.CACHE_KEY_PREFIX}${objectId}`;
 
-    if (user === undefined || user === null) {
-      const q = query(
-        this.userCollectionRef,
-        where("objectIdentifier", "==", objectId)
-      );
-      const querySnapshot = await getDocs(q);
-      const userDoc = querySnapshot.docs[0];
-
-      if (userDoc) {
-        const userData = userDoc.data() as User;
-        user = {
-          ...userData,
-        };
-
-        this.cache.set(key, user);
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const currentTime = new Date().getTime();
+        if (currentTime - timestamp < this.EXPIRATION_TIME) {
+          return data;
+        }
       }
-    }
 
-    return user;
+      const response = await axios.get(`${this.url}/users/auth/${objectId}`);
+      const user: User = response.data;
+
+      const dataToCache = {
+        data: user,
+        timestamp: new Date().getTime(),
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+
+      return user;
+    } catch (error) {
+      console.error(`Error fetching user with ObjectID ${objectId}:`, error);
+      throw error;
+    }
   };
 
   public createUserAsync = async (user: User): Promise<void> => {
-    const docRef = await addDoc(this.userCollectionRef, { ...user });
-    user.id = docRef.id;
-    const userObject = { ...user };
-    await setDoc(doc(db, docRef.path), userObject);
+    await axios.post(`${this.url}/users`, user);
   };
 
   public updateUser = async (user: User): Promise<void> => {
-    const userDoc = doc(db, this.collectionName, user.id);
-    await updateDoc(userDoc, { ...user });
+    await axios.put(`${this.url}/users/${user.id}`, user);
   };
 }

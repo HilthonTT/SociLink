@@ -11,7 +11,7 @@ export interface Comment {
   archived: boolean;
 }
 
-export const commentSchema = new Schema<Comment & Document>({
+export const commentSchema = new Schema<Comment>({
   comment: { type: String, required: true },
   thread: { type: basicThreadSchema, required: true },
   author: { type: basicUserSchema, required: true },
@@ -19,7 +19,7 @@ export const commentSchema = new Schema<Comment & Document>({
   archived: { type: Boolean, required: true, default: false },
 });
 
-export const CommentModel: Model<Comment & Document> = mongoose.model(
+export const CommentModel: Model<Comment> = mongoose.model<Comment>(
   "Comment",
   commentSchema
 );

@@ -51,7 +51,7 @@ router.get("/threads/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/threads/:userId", async (req: Request, res: Response) => {
+router.get("/threads/user/:userId", async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const threads = await ThreadModel.findOne(

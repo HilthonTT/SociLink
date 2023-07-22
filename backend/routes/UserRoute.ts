@@ -49,7 +49,7 @@ router.get("/users/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/users/:objectId", async (req: Request, res: Response) => {
+router.get("/users/auth/:objectId", async (req: Request, res: Response) => {
   try {
     const { objectId } = req.params;
     const user = await UserModel.findOne(

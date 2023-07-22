@@ -1,23 +1,8 @@
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  runTransaction,
-  setDoc,
-  updateDoc,
-  where,
-} from "firebase/firestore";
-import { db } from "../firebase/firebase";
-import { LRUCache } from "lru-cache";
 import { Thread } from "../models/thread";
-import { IUserData, UserData } from "./userData";
-import { BasicThread } from "../models/basicThread";
+import appsettings from "../appsettings.json";
+import axios from "axios";
 
 export interface IThreadData {
-  collectionName: string;
   getThreadsAsync: () => Promise<Thread[]>;
   getThreadAsync: (id: string) => Promise<Thread>;
   getUserThreadAsync: (userId: string) => Promise<Thread[]>;
@@ -27,145 +12,106 @@ export interface IThreadData {
 }
 
 export class ThreadData implements IThreadData {
-  public readonly collectionName = "threads";
-
-  private readonly cacheName = "ThreadData";
-  private readonly cachedTime = 60 * 60 * 1000; // in ms: 1 hour
-  private readonly threadCollectionRef = collection(db, this.collectionName);
-  private readonly userData: IUserData = new UserData();
-
-  private readonly cacheOptions = {
-    ttl: this.cachedTime,
-    ttlAutopurge: true,
-  };
-
-  private readonly cache = new LRUCache(this.cacheOptions);
+  private readonly CACHE_KEY_PREFIX = "cached_thread_";
+  private readonly CACHE_KEY = "cached_threads";
+  private readonly EXPIRATION_TIME = 60 * 60 * 1000; // 1 hour in milleseconds
+  private readonly apiUrl = appsettings.api.url;
 
   public getThreadsAsync = async (): Promise<Thread[]> => {
-    let threads = this.cache.get(this.cacheName) as Thread[];
+    try {
+      const cachedData = localStorage.getItem(this.CACHE_KEY);
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const currentTime = new Date().getTime();
+        if (currentTime - timestamp < this.EXPIRATION_TIME) {
+          return data;
+        }
+      }
 
-    if (threads === undefined) {
-      const q = query(this.threadCollectionRef, where("archived", "==", false));
-      const querySnapshot = await getDocs(q);
-      threads = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as Thread),
-        id: doc.id,
-      }));
+      const response = await axios.get(`${this.apiUrl}/threads`);
+      const threads: Thread[] = response.data;
 
-      this.cache.set(this.cacheName, threads);
+      const dataToCache = {
+        data: threads,
+        timestamp: new Date().getTime(),
+      };
+      localStorage.setItem(this.CACHE_KEY, JSON.stringify(dataToCache));
+
+      return threads;
+    } catch (error) {
+      console.error("Error fetching threads:", error);
+      throw error;
     }
-
-    return threads;
   };
 
   public getThreadAsync = async (id: string): Promise<Thread> => {
-    const key = `thread-${id}`;
-    let thread = this.cache.get(key) as Thread;
+    try {
+      const cacheKey = `${this.CACHE_KEY_PREFIX}${id}`;
 
-    if (thread === undefined || thread === null) {
-      const threadDoc = doc(db, this.collectionName, id);
-      const data = await getDoc(threadDoc);
-      thread = data.data() as Thread;
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const currentTime = new Date().getTime();
+        if (currentTime - timestamp < this.EXPIRATION_TIME) {
+          return data;
+        }
+      }
 
-      this.cache.set(key, thread);
+      const response = await axios.get(`${this.apiUrl}/threads/${id}`);
+      const user: Thread = response.data;
+
+      const dataToCache = {
+        data: user,
+        timestamp: new Date().getTime(),
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+
+      return user;
+    } catch (error) {
+      console.error(`Error fetching user with ID ${id}:`, error);
+      throw error;
     }
-
-    return thread;
   };
 
   public getUserThreadAsync = async (userId: string): Promise<Thread[]> => {
-    const key = `threads-${userId}`;
+    try {
+      const cachedData = localStorage.getItem(this.CACHE_KEY);
+      if (cachedData) {
+        const { data, timestamp } = JSON.parse(cachedData);
+        const currentTime = new Date().getTime();
+        if (currentTime - timestamp < this.EXPIRATION_TIME) {
+          return data;
+        }
+      }
 
-    let threads = this.cache.get(key) as Thread[];
+      const response = await axios.get(`${this.apiUrl}/threads/user/${userId}`);
+      const threads: Thread[] = response.data;
 
-    if (threads === undefined || threads === null) {
-      const q = query(
-        collection(db, "threads"),
-        where("author.id", "==", userId)
-      );
-      const querySnapshot = await getDocs(q);
+      const dataToCache = {
+        data: threads,
+        timestamp: new Date().getTime(),
+      };
+      localStorage.setItem(this.CACHE_KEY, JSON.stringify(dataToCache));
 
-      threads = querySnapshot.docs.map((threadDoc) => ({
-        ...(threadDoc.data() as Thread),
-        id: threadDoc.id,
-      }));
-
-      this.cache.set(key, threads);
+      return threads;
+    } catch (error) {
+      console.error("Error fetching threads:", error);
+      throw error;
     }
-
-    return threads;
   };
 
   public updateThreadAsync = async (thread: Thread): Promise<void> => {
-    const threadDoc = doc(db, this.collectionName, thread.id);
-    await updateDoc(threadDoc, { ...thread });
+    await axios.put(`${this.apiUrl}/threads/${thread.id}`, thread);
   };
 
   public createThreadAsync = async (thread: Thread): Promise<void> => {
-    try {
-      await runTransaction(db, async (transaction) => {
-        const threadDocRef = await addDoc(this.threadCollectionRef, {
-          ...thread,
-        });
-        thread.id = threadDocRef.id;
-
-        const user = await this.userData.getUserAsync(thread.author.id);
-        user.authoredThreads.push(BasicThread.fromThread(thread));
-
-        const userDocRef = doc(db, this.userData.collectionName, user.id);
-
-        transaction.update(userDocRef, {
-          authoredThreads: user.authoredThreads,
-        });
-
-        const threadObject = { ...thread };
-        await setDoc(doc(db, threadDocRef.path), threadObject);
-      });
-    } catch (error) {
-      throw error;
-    }
+    await axios.post(`${this.apiUrl}/threads`, thread);
   };
 
   public updateVoteThreadAsync = async (
     threadId: string,
     userId: string
   ): Promise<void> => {
-    try {
-      await runTransaction(db, async (transaction) => {
-        const thread = await this.getThreadAsync(threadId);
-        const isUpVote = thread.userVotes.includes(userId);
-
-        if (isUpVote) {
-          const index = thread.userVotes.indexOf(userId);
-          if (index !== -1) {
-            thread.userVotes.splice(index, 1);
-          }
-        }
-
-        const threadDocRef = doc(db, this.collectionName, thread.id);
-        await updateDoc(threadDocRef, { ...thread });
-
-        const user = await this.userData.getUserAsync(userId);
-        const userDocRef = doc(db, this.userData.collectionName, user.id);
-
-        if (isUpVote) {
-          const newThread = BasicThread.fromThread(thread);
-          user.votedOnThreads.push(newThread);
-        } else {
-          const threadToRemove = user.votedOnThreads.find(
-            (t) => t.id === threadId
-          ) as BasicThread;
-          user.votedOnThreads = user.votedOnThreads.filter(
-            (t) => t.id !== threadToRemove.id
-          );
-        }
-
-        transaction.update(userDocRef, {
-          votedOnThreads: user.votedOnThreads,
-        });
-      });
-    } catch (error) {
-      throw error;
-    }
+    await axios.put(`${this.apiUrl}/threads/${threadId}`, userId);
   };
 }
