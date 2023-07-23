@@ -23,7 +23,7 @@ export class CategoryData implements ICategoryData {
         }
       }
 
-      const response = await axios.get(`${this.url}/users`);
+      const response = await axios.get(`${this.url}/categories`);
       const categories: Category[] = response.data;
 
       const dataToCache = {
@@ -40,6 +40,6 @@ export class CategoryData implements ICategoryData {
   };
 
   public createCategoryAsync = async (category: Category): Promise<void> => {
-    await axios.post(`${this.url}/comments`, category);
+    await axios.post(`${this.url}/categories`, category);
   };
 }

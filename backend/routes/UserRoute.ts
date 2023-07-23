@@ -5,9 +5,17 @@ const router = express.Router();
 
 router.post("/users", async (req: Request, res: Response) => {
   try {
-    const { firstName, lastName, email, displayName, downloadUrl } = req.body;
+    const {
+      objectIdentifier,
+      firstName,
+      lastName,
+      email,
+      displayName,
+      downloadUrl,
+    } = req.body;
 
     const newUser = new UserModel({
+      objectIdentifier,
       firstName,
       lastName,
       email,
@@ -52,9 +60,8 @@ router.get("/users/:id", async (req: Request, res: Response) => {
 router.get("/users/auth/:objectId", async (req: Request, res: Response) => {
   try {
     const { objectId } = req.params;
-    const user = await UserModel.findOne(
-      (u: { objectId: string }) => u.objectId == objectId
-    );
+    const user = await UserModel.findOne({ objectIdentifier: objectId });
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }

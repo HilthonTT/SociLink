@@ -4,13 +4,13 @@ import { BasicComment } from "./basicComment";
 
 export class User {
   id: string;
-  objectIdentifier: string;
-  firstName: string;
-  lastName: string;
-  displayName: string;
-  email: string;
-  dateCreated: Timestamp = Timestamp.now();
-  downloadUrl: string;
+  objectIdentifier: string = "";
+  firstName: string = "";
+  lastName: string = "";
+  displayName: string = "";
+  email: string = "";
+  dateCreated: Date;
+  downloadUrl: string = "";
   authoredThreads: BasicThread[] = [];
   votedOnThreads: BasicThread[] = [];
   authoredComments: BasicComment[] = [];
@@ -30,5 +30,6 @@ export class User {
     this.displayName = displayName;
     this.email = email;
     this.downloadUrl = downloadUrl;
+    this.dateCreated = new Date();
   }
 }

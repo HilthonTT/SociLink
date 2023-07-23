@@ -126,8 +126,7 @@ export const Profile = () => {
                 </Typography>
                 <Box sx={{ flexGrow: 1 }} />
                 <Typography component="h2" variant="h6" color="text.primary">
-                  Joined on the{" "}
-                  {loggedInUser?.dateCreated.toDate().toLocaleDateString()}
+                  Joined on the {loggedInUser?.dateCreated.toLocaleDateString()}
                 </Typography>
               </Box>
             </CardContent>
