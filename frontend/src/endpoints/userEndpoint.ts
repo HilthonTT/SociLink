@@ -1,6 +1,6 @@
 import { User } from "../models/user";
 import axios from "axios";
-import appsettings from "../appsettings.json";
+import appsettings from "../appsettings_dev.json";
 
 export interface IUserEndpoint {
   getUsersAsync: () => Promise<User[]>;

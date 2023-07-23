@@ -398,3 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 socilink/src/appsettings.json
 backend/config/appsettings_dev.json
+frontend/src/appsettings_dev.json

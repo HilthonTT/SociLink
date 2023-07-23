@@ -1,5 +1,5 @@
 import { Category } from "../models/category";
-import appsettings from "../appsettings.json";
+import appsettings from "../appsettings_dev.json";
 import axios from "axios";
 
 export interface ICategoryEndpoint {
