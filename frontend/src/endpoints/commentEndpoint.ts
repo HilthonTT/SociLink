@@ -73,7 +73,7 @@ export class CommentEndpoint implements ICommentEndpoint {
   };
 
   public updateCommentAsync = async (comment: Comment): Promise<void> => {
-    await axios.put(`${this.url}/comments/${comment.id}`, comment);
+    await axios.put(`${this.url}/comments/${comment._id}`, comment);
   };
 
   public createCommentAsync = async (comment: Comment): Promise<void> => {

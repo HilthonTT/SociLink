@@ -40,7 +40,7 @@ export const Home = () => {
   const [categories, setCategories] = useState<Category[] | null>(null);
 
   const openDetails = (thread: Thread) => {
-    navigate(`Details/${thread.id}`);
+    navigate(`Details/${thread._id}`);
   };
 
   const loadMyThreadsPage = () => {
@@ -49,16 +49,6 @@ export const Home = () => {
 
   const loadCreatePage = () => {
     navigate("/Create");
-  };
-
-  const getThreadsAsync = async () => {
-    const threads = await threadEndpoint.getThreadsAsync();
-    setThreads(threads);
-  };
-
-  const getCategoriesAsync = async () => {
-    const categories = await categoryEndpoint.getCategoriesAsync();
-    setCategories(categories);
   };
 
   const onCategoryClick = (category: Category) => {
@@ -74,14 +64,24 @@ export const Home = () => {
     };
 
     getUser();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchThreadsAsync = async () => {
+      const threads = await threadEndpoint.getThreadsAsync();
+      setThreads(threads);
+    };
+
+    fetchThreadsAsync();
   }, []);
 
   useEffect(() => {
-    getThreadsAsync();
-  }, []);
+    const fetchCategoriesAsync = async () => {
+      const categories = await categoryEndpoint.getCategoriesAsync();
+      setCategories(categories);
+    };
 
-  useEffect(() => {
-    getCategoriesAsync();
+    fetchCategoriesAsync();
   }, []);
 
   return (
@@ -131,7 +131,7 @@ export const Home = () => {
         <Container sx={{ py: 8 }} maxWidth="md">
           <Grid container spacing={4}>
             {threads?.map((thread) => (
-              <Grid item key={thread.id} xs={12} sm={6} md={4}>
+              <Grid item key={thread._id} xs={12} sm={6} md={4}>
                 <Card
                   sx={{
                     height: "100%",
@@ -156,7 +156,7 @@ export const Home = () => {
                     <Button size="small" onClick={() => openDetails(thread)}>
                       View
                     </Button>
-                    {loggedInUser?.id === (thread.author?.id as string) && (
+                    {loggedInUser?._id === (thread.author?._id as string) && (
                       <Button size="small">Edit</Button>
                     )}
                   </CardActions>

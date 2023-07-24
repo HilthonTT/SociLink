@@ -49,32 +49,15 @@ export const Details = () => {
 
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [thread, setThread] = useState<Thread | null>(null);
+  const [formattedDate, setFormattedDate] = useState<string | null>(null);
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [comment, setComment] = useState("");
   const [value, setValue] = useState(0);
   const [threadFormOpen, setThreadFormOpen] = useState(false);
   const [DescriptionFormOpen, setDescriptionFormOpen] = useState(false);
 
-  const getThreadAsync = async () => {
-    const fetchedThread = await threadEndpoint.getThreadAsync(id as string);
-
-    if (fetchedThread === null) {
-      return;
-    }
-
-    setThread(fetchedThread);
-  };
-
   const handleValueChange = (event: SyntheticEvent, newValue: number) => {
     setValue(newValue);
-  };
-
-  const getThreadCommentsAsync = async () => {
-    const fetchedComments = await commentEndpoint.getThreadCommentsAsync(
-      id as string
-    );
-
-    setComments(fetchedComments);
   };
 
   const onCommentAsync = async () => {
@@ -101,15 +84,46 @@ export const Details = () => {
     };
 
     getUser();
-  }, [user, userEndpoint]);
+  }, [user]);
 
   useEffect(() => {
+    const getThreadAsync = async () => {
+      try {
+        const fetchedThread = await threadEndpoint.getThreadAsync(id as string);
+
+        setThread(fetchedThread);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     getThreadAsync();
   }, [id]);
 
   useEffect(() => {
+    const getThreadCommentsAsync = async () => {
+      try {
+        const fetchedComments = await commentEndpoint.getThreadCommentsAsync(
+          id as string
+        );
+
+        setComments(fetchedComments);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     getThreadCommentsAsync();
-  }, [comments]);
+  }, [id]);
+
+  useEffect(() => {
+    const dateCreated = thread?.dateCreated;
+    const formattedDate = dateCreated
+      ? new Date(dateCreated).toLocaleDateString()
+      : "N/A";
+
+    setFormattedDate(formattedDate);
+  }, [thread]);
 
   return (
     <Container>
@@ -164,7 +178,7 @@ export const Details = () => {
           <Typography component="div" variant="h6">
             Thread name: {thread?.thread}
           </Typography>
-          {thread?.author.id === loggedInUser?.id && (
+          {thread?.author._id === loggedInUser?._id && (
             <Button
               onClick={() => setThreadFormOpen(true)}
               startIcon={<ModeEdit />}
@@ -182,7 +196,7 @@ export const Details = () => {
           component="div"
           sx={{ justifyContent: "space-between", display: "flex" }}>
           <Typography component="div" variant="h6">
-            Date Posted: {thread?.dateCreated.toDate().toLocaleDateString()}
+            Date Posted: {formattedDate}
           </Typography>
         </Box>
         <Divider sx={{ borderWidth: 2 }} />
@@ -195,7 +209,7 @@ export const Details = () => {
             sx={{ wordWrap: "break-word" }}>
             {thread?.description}
           </Typography>
-          {thread?.author.id === loggedInUser?.id && (
+          {thread?.author._id === loggedInUser?._id && (
             <Button
               onClick={() => setDescriptionFormOpen(true)}
               startIcon={<ModeEdit />}
@@ -227,7 +241,7 @@ export const Details = () => {
         </Box>
         <Box component="div">
           {comments?.map((c) => (
-            <Card key={c.id} sx={{ minWidth: 275, marginBottom: 2 }}>
+            <Card key={c._id} sx={{ minWidth: 275, marginBottom: 2 }}>
               <CardContent>
                 <Typography variant="body1" component="div">
                   {c.comment}
@@ -235,7 +249,7 @@ export const Details = () => {
                   By: {c.author.displayName}
                 </Typography>
               </CardContent>
-              {c?.author.id === loggedInUser?.id && (
+              {c?.author._id === loggedInUser?._id && (
                 <CardActions>
                   <Button size="small">Edit</Button>
                   <Button size="small" color="error">

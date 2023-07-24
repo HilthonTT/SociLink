@@ -54,18 +54,18 @@ router.get("/threads/:id", async (req: Request, res: Response) => {
 router.get("/threads/user/:userId", async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const threads = await ThreadModel.findOne(
-      (t: { author: { id: string } }) => t.author.id == userId
-    );
+    const threads = await ThreadModel.find({
+      "author.id": userId,
+    });
 
-    if (!threads) {
+    if (!threads || threads.length === 0) {
       return res.status(404).json({ error: "Threads not found" });
     }
 
     res.json(threads);
   } catch (error) {
-    console.error("Error fetching thread:", error);
-    res.status(500).json({ error: "Error fetching thread" });
+    console.error("Error fetching threads:", error);
+    res.status(500).json({ error: "Error fetching threads" });
   }
 });
 
@@ -126,12 +126,12 @@ router.put("/threads/updateVote/:id", async (req: Request, res: Response) => {
 
     if (isUpVote) {
       const newThread: BasicThread = {
-        id: thread.id,
+        _id: thread.id,
         thread: thread.thread,
       };
       user.votedOnThreads.push(newThread);
     } else {
-      user.votedOnThreads = user.votedOnThreads.filter((t) => t.id !== id);
+      user.votedOnThreads = user.votedOnThreads.filter((t) => t._id !== id);
     }
 
     await user.save();

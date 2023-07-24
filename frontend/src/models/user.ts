@@ -3,7 +3,7 @@ import { BasicThread } from "./basicThread";
 import { BasicComment } from "./basicComment";
 
 export class User {
-  id: string;
+  _id: string;
   objectIdentifier: string = "";
   firstName: string = "";
   lastName: string = "";
@@ -23,7 +23,7 @@ export class User {
     email: string,
     downloadUrl: string
   ) {
-    this.id = "";
+    this._id = "";
     this.objectIdentifier = objectIdentifier;
     this.firstName = firstName;
     this.lastName = lastName;

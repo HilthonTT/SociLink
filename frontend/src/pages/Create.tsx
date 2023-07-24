@@ -38,10 +38,10 @@ export const Create = () => {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
 
-  const threadData: IThreadEndpoint = new ThreadEndpoint();
-  const categoryData: ICategoryEndpoint = new CategoryEndpoint();
+  const threadEndpoint: IThreadEndpoint = new ThreadEndpoint();
+  const categoryEndpoint: ICategoryEndpoint = new CategoryEndpoint();
   const imageData: IImageData = new ImageData();
-  const userData: IUserEndpoint = new UserEndpoint();
+  const userEndpoint: IUserEndpoint = new UserEndpoint();
 
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[] | null>();
@@ -81,11 +81,6 @@ export const Create = () => {
     setCategoryId(event.target.value);
   };
 
-  const getCategoriesAsync = async () => {
-    const categories = await categoryData.getCategoriesAsync();
-    setCategories(categories);
-  };
-
   const onCreateThreadAsync = async (data: CreateData) => {
     try {
       setErrorMessage("");
@@ -117,7 +112,7 @@ export const Create = () => {
         thread.downloadUrl = downloadUrl;
       }
 
-      await threadData.createThreadAsync(thread);
+      await threadEndpoint.createThreadAsync(thread);
       closePage();
     } catch {
       setErrorMessage("Something went wrong while uploading your thread.");
@@ -139,16 +134,25 @@ export const Create = () => {
   useEffect(() => {
     const getUser = async () => {
       if (user) {
-        const u = await userData.getUserFromAuth(user.uid);
+        const u = await userEndpoint.getUserFromAuth(user.uid);
         setLoggedInUser(u);
       }
     };
 
     getUser();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    getCategoriesAsync();
+    const fetchCategories = async () => {
+      try {
+        const categories = await categoryEndpoint.getCategoriesAsync();
+        setCategories(categories as Category[]);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   return (

@@ -16,18 +16,21 @@ export interface User {
   authoredComments: BasicComment[];
 }
 
-export const userSchema = new Schema<User & Document>({
-  objectIdentifier: { type: String, required: true, unique: true },
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  displayName: { type: String, required: true },
-  email: { type: String, required: true },
-  dateCreated: { type: Date, required: true, default: Date.now },
-  downloadUrl: { type: String, default: "" },
-  authoredThreads: { type: [{ type: basicThreadSchema }], default: [] },
-  votedOnThreads: { type: [{ type: basicThreadSchema }], default: [] },
-  authoredComments: { type: [{ type: basicCommentSchema }], default: [] },
-});
+export const userSchema = new Schema<User & Document>(
+  {
+    objectIdentifier: { type: String, required: true, unique: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    displayName: { type: String, required: true },
+    email: { type: String, required: true },
+    dateCreated: { type: Date, required: true, default: Date.now },
+    downloadUrl: { type: String, default: "" },
+    authoredThreads: { type: [{ type: basicThreadSchema }], default: [] },
+    votedOnThreads: { type: [{ type: basicThreadSchema }], default: [] },
+    authoredComments: { type: [{ type: basicCommentSchema }], default: [] },
+  },
+  { versionKey: false }
+);
 
 export const UserModel: Model<User & Document> = mongoose.model(
   "User",

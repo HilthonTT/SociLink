@@ -40,7 +40,7 @@ export const Account = () => {
     };
 
     getLoggedInUser();
-  }, [user, userEndpoint]);
+  }, [user]);
 
   return (
     <Container>

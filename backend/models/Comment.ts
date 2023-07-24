@@ -11,13 +11,20 @@ export interface Comment {
   archived: boolean;
 }
 
-export const commentSchema = new Schema<Comment>({
-  comment: { type: String, required: true },
-  thread: { type: basicThreadSchema, required: true },
-  author: { type: basicUserSchema, required: true },
-  dateCreated: { type: Date, required: true, default: new Date().getUTCDate() },
-  archived: { type: Boolean, required: true, default: false },
-});
+export const commentSchema = new Schema<Comment>(
+  {
+    comment: { type: String, required: true },
+    thread: { type: basicThreadSchema, required: true },
+    author: { type: basicUserSchema, required: true },
+    dateCreated: {
+      type: Date,
+      required: true,
+      default: new Date().getUTCDate(),
+    },
+    archived: { type: Boolean, required: true, default: false },
+  },
+  { versionKey: false }
+);
 
 export const CommentModel: Model<Comment> = mongoose.model<Comment>(
   "Comment",

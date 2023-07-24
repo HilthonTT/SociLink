@@ -71,7 +71,7 @@ export const SampleData = () => {
       basicUser
     );
 
-    console.log(t.author.id);
+    console.log(t.author._id);
 
     await threadEndpoint.createThreadAsync(t);
 

@@ -1,14 +1,17 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 
 export interface BasicComment {
-  id: string;
+  _id: string;
   comment: string;
 }
 
-export const basicCommentSchema = new Schema<BasicComment & Document>({
-  id: { type: String, required: true },
-  comment: { type: String, required: true },
-});
+export const basicCommentSchema = new Schema<BasicComment & Document>(
+  {
+    _id: { type: String, required: true },
+    comment: { type: String, required: true },
+  },
+  { versionKey: false }
+);
 
 export const BasicCommentModel: Model<BasicComment & Document> = mongoose.model(
   "BasicComment",

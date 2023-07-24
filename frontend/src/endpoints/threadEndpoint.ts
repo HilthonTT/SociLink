@@ -102,9 +102,9 @@ export class ThreadEndpoint implements IThreadEndpoint {
   public getThreadAsync = async (id: string): Promise<Thread> => {
     try {
       const response = await axios.get(`${this.apiUrl}/threads/${id}`);
-      const user: Thread = response.data;
+      const thread: Thread = response.data;
 
-      return user;
+      return thread;
     } catch (error) {
       console.error(`Error fetching user with ID ${id}:`, error);
       throw error;
@@ -136,7 +136,7 @@ export class ThreadEndpoint implements IThreadEndpoint {
   };
 
   public updateThreadAsync = async (thread: Thread): Promise<void> => {
-    await axios.put(`${this.apiUrl}/threads/${thread.id}`, thread);
+    await axios.put(`${this.apiUrl}/threads/${thread._id}`, thread);
   };
 
   public createThreadAsync = async (thread: Thread): Promise<void> => {

@@ -1,13 +1,12 @@
-import { Timestamp } from "firebase/firestore";
 import { BasicUser } from "./basicUser";
 import { Category } from "./category";
 
 export class Thread {
-  id: string;
+  _id: string;
   thread: string;
   description: string;
   category: Category;
-  dateCreated: Timestamp = Timestamp.now();
+  dateCreated: Date = new Date();
   author: BasicUser;
   downloadUrl: string;
   userVotes: string[] = [];
@@ -20,7 +19,7 @@ export class Thread {
     downloadUrl: string,
     author: BasicUser
   ) {
-    this.id = "";
+    this._id = "";
     this.thread = thread;
     this.description = description;
     this.category = category;

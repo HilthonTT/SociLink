@@ -14,6 +14,7 @@ import {
   CardActions,
   CardContent,
   CardHeader,
+  CssBaseline,
   Grid,
   Link,
   Table,
@@ -35,6 +36,7 @@ export const Profile = () => {
   const loadMoreCount = 10;
 
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
+  const [formattedDate, setFormattedDate] = useState<string | null>(null);
   const [profileUser, setProfileUser] = useState<User | null>(null);
   const [threads, setThreads] = useState<Thread[] | null>(null);
   const [visibleThreads, setVisibleThreads] =
@@ -59,7 +61,7 @@ export const Profile = () => {
     };
 
     getUser();
-  }, [user, userEndpoint]);
+  }, [user]);
 
   useEffect(() => {
     const getProfileUser = async () => {
@@ -68,21 +70,35 @@ export const Profile = () => {
     };
 
     getProfileUser();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     const getThreads = async () => {
-      const fetchedThreads = await threadEndpoint.getUserThreadAsync(
-        id as string
-      );
-      setThreads(fetchedThreads);
+      try {
+        const fetchedThreads = await threadEndpoint.getUserThreadAsync(
+          id as string
+        );
+        setThreads(fetchedThreads);
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     getThreads();
-  }, []);
+  }, [id]);
+
+  useEffect(() => {
+    const dateCreated = profileUser?.dateCreated;
+    const formattedDate = dateCreated
+      ? new Date(dateCreated).toLocaleDateString()
+      : "N/A";
+
+    setFormattedDate(formattedDate);
+  }, [profileUser]);
 
   return (
     <div>
+      <CssBaseline />
       <Grid
         sx={{ marginTop: 1, marginBottom: 3 }}
         container
@@ -128,12 +144,12 @@ export const Profile = () => {
                 </Typography>
                 <Box sx={{ flexGrow: 1 }} />
                 <Typography component="h2" variant="h6" color="text.primary">
-                  Joined on the {loggedInUser?.dateCreated.toLocaleDateString()}
+                  Joined on {formattedDate}
                 </Typography>
               </Box>
             </CardContent>
             <CardActions>
-              {profileUser?.id === loggedInUser?.id && (
+              {profileUser?._id === loggedInUser?._id && (
                 <Button fullWidth variant="contained" onClick={loadAccountPage}>
                   View Account
                 </Button>
@@ -145,7 +161,8 @@ export const Profile = () => {
 
       <Fragment>
         <Typography component="h2" variant="h6" color="primary" gutterBottom>
-          {loggedInUser?.displayName}'s Threads {`[ ${threads?.length} ]`}
+          {loggedInUser?.displayName}'s Threads{" "}
+          {`[ ${threads ? threads.length : "0"} ]`}
         </Typography>
         <Table size="small">
           <TableHead>
@@ -158,10 +175,8 @@ export const Profile = () => {
           </TableHead>
           <TableBody>
             {threads?.slice(0, visibleThreads).map((thread) => (
-              <TableRow key={thread.id}>
-                <TableCell>
-                  {thread.dateCreated.toDate().toLocaleDateString()}
-                </TableCell>
+              <TableRow key={thread._id}>
+                <TableCell>{thread.dateCreated.toLocaleDateString()}</TableCell>
                 <TableCell>{thread.thread}</TableCell>
                 <TableCell>{thread.author.displayName}</TableCell>
                 <TableCell>{thread.userVotes.length}</TableCell>

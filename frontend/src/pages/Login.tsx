@@ -66,20 +66,15 @@ export const Login = () => {
     navigate("/Register");
   };
 
-  const getAuthState = () => {
-    if (user) {
-      navigate("/");
-    }
-  };
-
   useEffect(() => {
-    onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        navigate("/");
+      }
     });
-  }, []);
 
-  useEffect(() => {
-    getAuthState();
+    return () => unsubscribe();
   }, []);
 
   return (

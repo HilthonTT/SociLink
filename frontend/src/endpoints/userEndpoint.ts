@@ -94,6 +94,6 @@ export class UserEndpoint implements IUserEndpoint {
   };
 
   public updateUser = async (user: User): Promise<void> => {
-    await axios.put(`${this.url}/users/${user.id}`, user);
+    await axios.put(`${this.url}/users/${user._id}`, user);
   };
 }

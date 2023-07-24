@@ -55,7 +55,11 @@ export const Navbar = () => {
   };
 
   const loadProfilePage = (): void => {
-    navigate(`/Profile/${loggedInUser?.id}`);
+    if (!loggedInUser) {
+      return;
+    }
+
+    navigate(`/Profile/${loggedInUser._id}`);
   };
 
   const loadHomePage = (): void => {
@@ -145,15 +149,16 @@ export const Navbar = () => {
   };
 
   useEffect(() => {
-    const getLoggedInUser = async (): Promise<void> => {
+    const getLoggedInUser = async () => {
       if (user) {
-        const u = await userEndpoint.getUserFromAuth(user.uid);
+        const u = await userEndpoint.getUserFromAuth(user?.uid);
         setLoggedInUser(u);
+        console.log(loggedInUser);
       }
     };
 
     getLoggedInUser();
-  }, [user, userEndpoint]);
+  }, [user]);
 
   return (
     <AppBar position="static">

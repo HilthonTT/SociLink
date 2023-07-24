@@ -34,7 +34,7 @@ export const MyThreads = () => {
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
 
   const openDetails = (thread: Thread) => {
-    navigate(`/Details/${thread.id}`);
+    navigate(`/Details/${thread._id}`);
   };
 
   const filterThreads = (searchText: string) => {
@@ -69,21 +69,25 @@ export const MyThreads = () => {
     };
 
     fetchData();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (loggedInUser) {
-        const userThreads = await threadEndpoint.getUserThreadAsync(
-          loggedInUser.id
-        );
-        setThreads(userThreads);
-        setFilteredThreads(userThreads);
+      try {
+        if (loggedInUser) {
+          const userThreads = await threadEndpoint.getUserThreadAsync(
+            loggedInUser._id
+          );
+          setThreads(userThreads);
+          setFilteredThreads(userThreads);
+        }
+      } catch (error) {
+        console.log(error);
       }
     };
 
     fetchData();
-  }, []);
+  }, [loggedInUser]);
 
   return (
     <div>
@@ -137,7 +141,7 @@ export const MyThreads = () => {
         <Container sx={{ py: 8 }} maxWidth="md">
           <Grid container spacing={4}>
             {filteredThreads?.map((thread) => (
-              <Grid item key={thread.id} xs={12} sm={6} md={4}>
+              <Grid item key={thread._id} xs={12} sm={6} md={4}>
                 <Card
                   sx={{
                     height: "100%",
@@ -162,7 +166,7 @@ export const MyThreads = () => {
                     <Button size="small" onClick={() => openDetails(thread)}>
                       View
                     </Button>
-                    {loggedInUser?.id === (thread.author?.id as string) && (
+                    {loggedInUser?._id === (thread.author?._id as string) && (
                       <Button size="small">Edit</Button>
                     )}
                   </CardActions>
