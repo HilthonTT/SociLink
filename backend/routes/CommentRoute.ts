@@ -3,7 +3,7 @@ import { CommentModel } from "../models/Comment";
 
 const router = express.Router();
 
-router.get("/comments/:threadId", async (req: Request, res: Response) => {
+router.get("/comments/thread/:threadId", async (req: Request, res: Response) => {
   try {
     const { threadId } = req.params;
     const comments = CommentModel.find(

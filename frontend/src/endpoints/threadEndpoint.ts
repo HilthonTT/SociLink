@@ -17,25 +17,80 @@ export class ThreadEndpoint implements IThreadEndpoint {
   private readonly EXPIRATION_TIME = 60 * 60 * 1000; // 1 hour in milleseconds
   private readonly apiUrl = appsettings.api.url;
 
+  private getCachedThreads = (): Thread[] | null => {
+    const cachedThreadsString = localStorage.getItem(this.CACHE_KEY_PREFIX);
+    if (cachedThreadsString) {
+      const cachedThreads: Thread[] = JSON.parse(cachedThreadsString);
+      return cachedThreads;
+    }
+    return null;
+  };
+
+  private cacheThreads = (threads: Thread[]): void => {
+    localStorage.setItem(this.CACHE_KEY_PREFIX, JSON.stringify(threads));
+    const expirationTime = Date.now() + this.EXPIRATION_TIME;
+    localStorage.setItem(
+      this.CACHE_KEY_PREFIX + this.CACHE_KEY,
+      expirationTime.toString()
+    );
+  };
+
+  private areCachedThreadsExpired = (): boolean => {
+    const expirationTime = localStorage.getItem(
+      this.CACHE_KEY_PREFIX + this.CACHE_KEY
+    );
+    if (expirationTime) {
+      return Date.now() > parseInt(expirationTime);
+    }
+    return true;
+  };
+
+  private getCachedUserThreads = (userId: string): Thread[] | null => {
+    const cachedThreadsString = localStorage.getItem(
+      this.CACHE_KEY_PREFIX + userId
+    );
+    if (cachedThreadsString) {
+      const cachedThreads: Thread[] = JSON.parse(cachedThreadsString);
+      return cachedThreads;
+    }
+    return null;
+  };
+
+  private cacheUserThreads = (userId: string, threads: Thread[]): void => {
+    localStorage.setItem(
+      this.CACHE_KEY_PREFIX + userId,
+      JSON.stringify(threads)
+    );
+    const expirationTime = Date.now() + this.EXPIRATION_TIME;
+    localStorage.setItem(
+      this.CACHE_KEY_PREFIX + userId + this.CACHE_KEY,
+      expirationTime.toString()
+    );
+  };
+
+  private areCachedUserThreadsExpired = (userId: string): boolean => {
+    const expirationTime = localStorage.getItem(
+      this.CACHE_KEY_PREFIX + userId + this.CACHE_KEY
+    );
+    if (expirationTime) {
+      return Date.now() > parseInt(expirationTime);
+    }
+    return true;
+  };
+
   public getThreadsAsync = async (): Promise<Thread[]> => {
     try {
-      // const cachedData = localStorage.getItem(this.CACHE_KEY);
-      // if (cachedData) {
-      //   const { data, timestamp } = JSON.parse(cachedData);
-      //   const currentTime = new Date().getTime();
-      //   if (currentTime - timestamp < this.EXPIRATION_TIME) {
-      //     return data;
-      //   }
-      // }
+      if (!this.areCachedThreadsExpired()) {
+        const cachedThreads = this.getCachedThreads();
+        if (cachedThreads) {
+          return cachedThreads;
+        }
+      }
 
       const response = await axios.get(`${this.apiUrl}/threads`);
       const threads: Thread[] = response.data;
 
-      const dataToCache = {
-        data: threads,
-        timestamp: new Date().getTime(),
-      };
-      //localStorage.setItem(this.CACHE_KEY, JSON.stringify(dataToCache));
+      this.cacheThreads(threads);
 
       return threads;
     } catch (error) {
@@ -46,25 +101,8 @@ export class ThreadEndpoint implements IThreadEndpoint {
 
   public getThreadAsync = async (id: string): Promise<Thread> => {
     try {
-      // const cacheKey = `${this.CACHE_KEY_PREFIX}${id}`;
-
-      // const cachedData = localStorage.getItem(cacheKey);
-      // if (cachedData) {
-      //   const { data, timestamp } = JSON.parse(cachedData);
-      //   const currentTime = new Date().getTime();
-      //   if (currentTime - timestamp < this.EXPIRATION_TIME) {
-      //     return data;
-      //   }
-      // }
-
       const response = await axios.get(`${this.apiUrl}/threads/${id}`);
       const user: Thread = response.data;
-
-      const dataToCache = {
-        data: user,
-        timestamp: new Date().getTime(),
-      };
-     // localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
 
       return user;
     } catch (error) {
@@ -75,27 +113,24 @@ export class ThreadEndpoint implements IThreadEndpoint {
 
   public getUserThreadAsync = async (userId: string): Promise<Thread[]> => {
     try {
-      // const cachedData = localStorage.getItem(this.CACHE_KEY);
-      // if (cachedData) {
-      //   const { data, timestamp } = JSON.parse(cachedData);
-      //   const currentTime = new Date().getTime();
-      //   if (currentTime - timestamp < this.EXPIRATION_TIME) {
-      //     return data;
-      //   }
-      // }
+      if (!this.areCachedUserThreadsExpired(userId)) {
+        const cachedUserThreads = this.getCachedUserThreads(userId);
+        if (cachedUserThreads) {
+          return cachedUserThreads;
+        }
+      }
 
       const response = await axios.get(`${this.apiUrl}/threads/user/${userId}`);
-      const threads: Thread[] = response.data;
+      const userThreads: Thread[] = response.data;
 
-      const dataToCache = {
-        data: threads,
-        timestamp: new Date().getTime(),
-      };
-      //localStorage.setItem(this.CACHE_KEY, JSON.stringify(dataToCache));
+      this.cacheUserThreads(userId, userThreads);
 
-      return threads;
+      return userThreads;
     } catch (error) {
-      console.error("Error fetching threads:", error);
+      console.error(
+        `Error fetching threads for user with ID ${userId}:`,
+        error
+      );
       throw error;
     }
   };

@@ -16,25 +16,47 @@ export class UserEndpoint implements IUserEndpoint {
   private readonly EXPIRATION_TIME = 60 * 60 * 1000; // 1 hour in millisecond
   private readonly url = appsettings.api.url;
 
+  private getCachedUsers = (): User[] | null => {
+    const cachedUsersString = localStorage.getItem(this.CACHE_KEY);
+    if (cachedUsersString) {
+      const cachedUsers: User[] = JSON.parse(cachedUsersString);
+      return cachedUsers;
+    }
+    return null;
+  };
+
+  private cacheUsers = (users: User[]): void => {
+    localStorage.setItem(this.CACHE_KEY, JSON.stringify(users));
+    const expirationTime = Date.now() + this.EXPIRATION_TIME;
+    localStorage.setItem(
+      this.CACHE_KEY_PREFIX + this.CACHE_KEY,
+      expirationTime.toString()
+    );
+  };
+
+  private areCachedUsersExpired = (): boolean => {
+    const expirationTime = localStorage.getItem(
+      this.CACHE_KEY_PREFIX + this.CACHE_KEY
+    );
+    if (expirationTime) {
+      return Date.now() > parseInt(expirationTime);
+    }
+    return true;
+  };
+
   public getUsersAsync = async (): Promise<User[]> => {
     try {
-      // const cachedData = localStorage.getItem(this.CACHE_KEY);
-      // if (cachedData) {
-      //   const { data, timestamp } = JSON.parse(cachedData);
-      //   const currentTime = new Date().getTime();
-      //   if (currentTime - timestamp < this.EXPIRATION_TIME) {
-      //     return data;
-      //   }
-      // }
+      if (!this.areCachedUsersExpired()) {
+        const cachedUsers = this.getCachedUsers();
+        if (cachedUsers) {
+          return cachedUsers;
+        }
+      }
 
       const response = await axios.get(`${this.url}/users`);
       const users: User[] = response.data;
 
-      // const dataToCache = {
-      //   data: users,
-      //   timestamp: new Date().getTime(),
-      // };
-      // localStorage.setItem(this.CACHE_KEY, JSON.stringify(dataToCache));
+      this.cacheUsers(users);
 
       return users;
     } catch (error) {
@@ -45,25 +67,8 @@ export class UserEndpoint implements IUserEndpoint {
 
   public getUserAsync = async (id: string): Promise<User> => {
     try {
-      // const cacheKey = `${this.CACHE_KEY_PREFIX}${id}`;
-
-      // const cachedData = localStorage.getItem(cacheKey);
-      // if (cachedData) {
-      //   const { data, timestamp } = JSON.parse(cachedData);
-      //   const currentTime = new Date().getTime();
-      //   if (currentTime - timestamp < this.EXPIRATION_TIME) {
-      //     return data;
-      //   }
-      // }
-
       const response = await axios.get(`${this.url}/users/${id}`);
       const user: User = response.data;
-
-      // const dataToCache = {
-      //   data: user,
-      //   timestamp: new Date().getTime(),
-      // };
-      // localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
 
       return user;
     } catch (error) {
@@ -74,25 +79,8 @@ export class UserEndpoint implements IUserEndpoint {
 
   getUserFromAuth = async (objectId: string): Promise<User> => {
     try {
-      // const cacheKey = `${this.CACHE_KEY_PREFIX}${objectId}`;
-
-      // const cachedData = localStorage.getItem(cacheKey);
-      // if (cachedData) {
-      //   const { data, timestamp } = JSON.parse(cachedData);
-      //   const currentTime = new Date().getTime();
-      //   if (currentTime - timestamp < this.EXPIRATION_TIME) {
-      //     return data;
-      //   }
-      // }
-
       const response = await axios.get(`${this.url}/users/auth/${objectId}`);
       const user: User = response.data;
-
-      const dataToCache = {
-        data: user,
-        timestamp: new Date().getTime(),
-      };
-      //localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
 
       return user;
     } catch (error) {

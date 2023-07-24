@@ -9,32 +9,61 @@ export interface ICommentEndpoint {
 }
 
 export class CommentEndpoint implements ICommentEndpoint {
-  private readonly CACHE_KEY_PREFIX = "cached_comment_";
+  private readonly CACHE_KEY_PREFIX = "cached_comments_thread_";
   private readonly EXPIRATION_TIME = 60 * 60 * 1000;
   private readonly url = appsettings.api.url;
+
+  private getCachedThreadComments = (threadId: string): Comment[] | null => {
+    const cachedCommentsString = localStorage.getItem(
+      this.CACHE_KEY_PREFIX + threadId
+    );
+    if (cachedCommentsString) {
+      const cachedComments: Comment[] = JSON.parse(cachedCommentsString);
+      return cachedComments;
+    }
+    return null;
+  };
+
+  private cacheThreadComments = (
+    threadId: string,
+    comments: Comment[]
+  ): void => {
+    localStorage.setItem(
+      this.CACHE_KEY_PREFIX + threadId,
+      JSON.stringify(comments)
+    );
+    const expirationTime = Date.now() + this.EXPIRATION_TIME;
+    localStorage.setItem(
+      this.CACHE_KEY_PREFIX + threadId + "_expiration",
+      expirationTime.toString()
+    );
+  };
+
+  private areCachedThreadCommentsExpired = (threadId: string): boolean => {
+    const expirationTime = localStorage.getItem(
+      this.CACHE_KEY_PREFIX + threadId + "_expiration"
+    );
+    if (expirationTime) {
+      return Date.now() > parseInt(expirationTime);
+    }
+    return true;
+  };
 
   public getThreadCommentsAsync = async (
     threadId: string
   ): Promise<Comment[]> => {
     try {
-      // const cacheKey = `${this.CACHE_KEY_PREFIX}${threadId}`;
-      // const cachedData = localStorage.getItem(cacheKey);
-      // if (cachedData) {
-      //   const { data, timestamp } = JSON.parse(cachedData);
-      //   const currentTime = new Date().getTime();
-      //   if (currentTime - timestamp < this.EXPIRATION_TIME) {
-      //     return data;
-      //   }
-      // }
+      if (!this.areCachedThreadCommentsExpired(threadId)) {
+        const cachedComments = this.getCachedThreadComments(threadId);
+        if (cachedComments) {
+          return cachedComments;
+        }
+      }
 
-      const response = await axios.get(`${this.url}/users`);
+      const response = await axios.get(`${this.url}/comment/${threadId}`);
       const comments: Comment[] = response.data;
 
-      const dataToCache = {
-        data: comments,
-        timestamp: new Date().getTime(),
-      };
-      //localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+      this.cacheThreadComments(threadId, comments);
 
       return comments;
     } catch (error) {
