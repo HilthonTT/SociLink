@@ -19,7 +19,7 @@ export const commentSchema = new Schema<Comment>(
     dateCreated: {
       type: Date,
       required: true,
-      default: new Date().getUTCDate(),
+      default: Date.now,
     },
     archived: { type: Boolean, required: true, default: false },
   },

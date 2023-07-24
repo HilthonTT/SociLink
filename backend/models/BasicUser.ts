@@ -1,4 +1,4 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import { Document, Schema } from "mongoose";
 
 export interface BasicUser {
   _id: string;
@@ -11,9 +11,4 @@ export const basicUserSchema = new Schema<BasicUser & Document>(
     displayName: { type: String, required: true },
   },
   { versionKey: false }
-);
-
-export const BasicUserModel: Model<BasicUser & Document> = mongoose.model(
-  "BasicUser",
-  basicUserSchema
 );
