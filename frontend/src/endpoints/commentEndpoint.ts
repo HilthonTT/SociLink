@@ -60,7 +60,7 @@ export class CommentEndpoint implements ICommentEndpoint {
         }
       }
 
-      const response = await axios.get(`${this.url}/comment/${threadId}`);
+      const response = await axios.get(`${this.url}/comments/thread/${threadId}`);
       const comments: Comment[] = response.data;
 
       this.cacheThreadComments(threadId, comments);

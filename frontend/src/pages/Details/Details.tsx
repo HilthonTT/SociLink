@@ -75,6 +75,18 @@ export const Details = () => {
     setComment("");
   };
 
+  const onArchiveCommentAsync = async (comment: Comment) => {
+    comment.archived = true;
+
+    await commentEndpoint.updateCommentAsync(comment);
+
+    if (comments) {
+      setComments((prevComments) =>
+        prevComments ? prevComments.filter((c) => c._id !== comment._id) : null
+      );
+    }
+  };
+
   useEffect(() => {
     const getUser = async () => {
       if (user) {
@@ -209,7 +221,7 @@ export const Details = () => {
             sx={{ wordWrap: "break-word" }}>
             {thread?.description}
           </Typography>
-          {thread?.author._id === loggedInUser?._id && (
+          {thread?.author._id == loggedInUser?._id && (
             <Button
               onClick={() => setDescriptionFormOpen(true)}
               startIcon={<ModeEdit />}
@@ -252,7 +264,10 @@ export const Details = () => {
               {c?.author._id === loggedInUser?._id && (
                 <CardActions>
                   <Button size="small">Edit</Button>
-                  <Button size="small" color="error">
+                  <Button
+                    size="small"
+                    color="error"
+                    onClick={() => onArchiveCommentAsync(c)}>
                     Delete
                   </Button>
                 </CardActions>

@@ -52,6 +52,15 @@ export const Profile = () => {
     navigate("/Account");
   };
 
+  const formatThreadDate = (thread: Thread): string => {
+    const threadDate = thread.dateCreated;
+    const formattedDate = threadDate
+      ? new Date(threadDate).toLocaleDateString()
+      : "N/A";
+
+    return formattedDate;
+  };
+
   useEffect(() => {
     const getUser = async () => {
       if (user) {
@@ -176,7 +185,7 @@ export const Profile = () => {
           <TableBody>
             {threads?.slice(0, visibleThreads).map((thread) => (
               <TableRow key={thread._id}>
-                <TableCell>{thread.dateCreated.toLocaleDateString()}</TableCell>
+                <TableCell>{formatThreadDate(thread)}</TableCell>
                 <TableCell>{thread.thread}</TableCell>
                 <TableCell>{thread.author.displayName}</TableCell>
                 <TableCell>{thread.userVotes.length}</TableCell>

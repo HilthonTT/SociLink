@@ -1,21 +1,22 @@
-import express, { Request, Response, Router } from "express";
+import express, { Request, Response } from "express";
 import { CommentModel } from "../models/Comment";
 
 const router = express.Router();
 
-router.get("/comments/thread/:threadId", async (req: Request, res: Response) => {
-  try {
-    const { threadId } = req.params;
-    const comments = CommentModel.find(
-      (c: { thread: { id: string } }) => c.thread.id == threadId
-    );
+router.get(
+  "/comments/thread/:threadId",
+  async (req: Request, res: Response) => {
+    try {
+      const { threadId } = req.params;
+      const comments = await CommentModel.find({ "thread._id": threadId });
 
-    res.json(comments);
-  } catch (error) {
-    console.error("Error fetching comments: ", error);
-    res.status(500).json({ error: "Error fetching comments" });
+      res.json(comments);
+    } catch (error) {
+      console.error("Error fetching comments: ", error);
+      res.status(500).json({ error: "Error fetching comments" });
+    }
   }
-});
+);
 
 router.post("/comments", async (req: Request, res: Response) => {
   try {
@@ -39,11 +40,11 @@ router.post("/comments", async (req: Request, res: Response) => {
 router.put("/comments/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { comment } = req.body;
+    const { comment, archived } = req.body;
 
     const updatedComment = await CommentModel.findByIdAndUpdate(
       id,
-      { comment },
+      { comment, archived },
       { new: true }
     );
 
