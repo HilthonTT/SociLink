@@ -1,17 +1,34 @@
 import express, { Request, Response } from "express";
 import { CommentModel } from "../models/Comment";
+import { LRUCache } from "lru-cache";
 
 const router = express.Router();
+
+const cacheOptions = {
+  max: 500,
+  maxAge: 60 * 1000 * 60, // 1 hour
+};
+
+const commentsCache = new LRUCache(cacheOptions);
+const cacheKey = "comments_";
 
 router.get(
   "/comments/thread/:threadId",
   async (req: Request, res: Response) => {
     try {
       const { threadId } = req.params;
+
+      const cachedComments = commentsCache.get(cacheKey + threadId);
+      if (cachedComments) {
+        return res.json(cachedComments);
+      }
+
       const comments = await CommentModel.find({
         "thread._id": threadId,
         archived: false,
       });
+
+      commentsCache.set(cacheKey, comments);
 
       res.json(comments);
     } catch (error) {

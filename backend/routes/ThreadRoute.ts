@@ -2,9 +2,19 @@ import express, { Request, Response } from "express";
 import { ThreadModel } from "../models/Thread";
 import { UserModel } from "../models/User";
 import { BasicThread } from "../models/BasicThread";
+import { LRUCache } from "lru-cache";
 import mongoose from "mongoose";
 
 const router = express.Router();
+
+const cacheOptions = {
+  max: 500,
+  maxAge: 60 * 1000 * 60, // 1 hour
+};
+
+const threadCache = new LRUCache(cacheOptions);
+const cacheKey = "threads";
+const cacheKeyPrefix = "thread_";
 
 router.post("/threads", async (req: Request, res: Response) => {
   try {
@@ -28,7 +38,14 @@ router.post("/threads", async (req: Request, res: Response) => {
 
 router.get("/threads", async (req: Request, res: Response) => {
   try {
+    const cachedThreads = threadCache.get(cacheKey);
+    if (cachedThreads) {
+      return res.json(cachedThreads);
+    }
+
     const threads = await ThreadModel.find({ archived: false });
+    threadCache.set(cacheKey, threads);
+
     res.json(threads);
   } catch (error) {
     console.error("Error fetching threads", error);
@@ -39,10 +56,19 @@ router.get("/threads", async (req: Request, res: Response) => {
 router.get("/threads/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    const key = cacheKeyPrefix + id;
+    const cachedThreads = threadCache.get(key);
+    if (cachedThreads) {
+      return res.json(cachedThreads);
+    }
+
     const thread = await ThreadModel.findById(id);
     if (!thread) {
       return res.status(404).json({ error: "Thread not found" });
     }
+
+    threadCache.set(key, thread);
 
     res.json(thread);
   } catch (error) {
@@ -55,12 +81,20 @@ router.get("/threads/user/:userId", async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const threads = await ThreadModel.find({
-      "author.id": userId,
+      "author._id": userId,
     });
+
+    const key = cacheKeyPrefix + userId;
+    const cachedThreads = threadCache.get(key);
+    if (cachedThreads) {
+      return res.json(cachedThreads);
+    }
 
     if (!threads || threads.length === 0) {
       return res.status(404).json({ error: "Threads not found" });
     }
+
+    threadCache.set(key, threads);
 
     res.json(threads);
   } catch (error) {

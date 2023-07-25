@@ -1,7 +1,17 @@
 import express, { Request, Response } from "express";
 import { UserModel } from "../models/User";
+import { LRUCache } from "lru-cache";
 
 const router = express.Router();
+
+const cacheOptions = {
+  max: 500,
+  maxAge: 60 * 1000 * 60, // 1 hour
+};
+
+const usersCache = new LRUCache(cacheOptions);
+const cacheKey = "users";
+const cacheKeyPrefix = "users_";
 
 router.post("/users", async (req: Request, res: Response) => {
   try {
@@ -33,7 +43,13 @@ router.post("/users", async (req: Request, res: Response) => {
 
 router.get("/users", async (req: Request, res: Response) => {
   try {
+    const cachedUsers = usersCache.get(cacheKey);
+    if (cachedUsers) {
+      return res.json(cachedUsers);
+    }
+
     const users = await UserModel.find();
+    usersCache.set(cacheKey, users);
 
     res.json(users);
   } catch (error) {
@@ -45,10 +61,19 @@ router.get("/users", async (req: Request, res: Response) => {
 router.get("/users/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+
+    const key = cacheKeyPrefix + id;
+    const cachedUser = usersCache.get(key);
+    if (cachedUser) {
+      return res.json(cachedUser);
+    }
+
     const user = await UserModel.findById(id);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    usersCache.set(key, user);
 
     res.json(user);
   } catch (error) {

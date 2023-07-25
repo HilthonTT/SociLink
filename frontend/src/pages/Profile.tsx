@@ -88,6 +88,8 @@ export const Profile = () => {
           id as string
         );
         setThreads(fetchedThreads);
+
+        console.log(fetchedThreads);
       } catch (error) {
         console.error(error);
       }
