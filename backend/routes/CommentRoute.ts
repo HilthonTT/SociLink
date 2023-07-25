@@ -8,7 +8,10 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const { threadId } = req.params;
-      const comments = await CommentModel.find({ "thread._id": threadId });
+      const comments = await CommentModel.find({
+        "thread._id": threadId,
+        archived: false,
+      });
 
       res.json(comments);
     } catch (error) {

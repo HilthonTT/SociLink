@@ -28,7 +28,7 @@ router.post("/threads", async (req: Request, res: Response) => {
 
 router.get("/threads", async (req: Request, res: Response) => {
   try {
-    const threads = await ThreadModel.find();
+    const threads = await ThreadModel.find({ archived: false });
     res.json(threads);
   } catch (error) {
     console.error("Error fetching threads", error);
