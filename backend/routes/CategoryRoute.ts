@@ -33,12 +33,10 @@ router.get("/categories", async (req: Request, res: Response) => {
   try {
     const cachedCategories = categoriesCache.get(cacheKey);
     if (cachedCategories) {
-      console.log("Using cached categories");
       return res.json(cachedCategories);
     }
 
     const categories = await CategoryModel.find();
-
     categoriesCache.set(cacheKey, categories);
 
     res.json(categories);
