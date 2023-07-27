@@ -19,13 +19,11 @@ import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
 import { IUserEndpoint, UserEndpoint } from "../endpoints/userEndpoint";
+import { onAuthStateChanged } from "firebase/auth";
 
 export const Home = () => {
-  const [user] = useAuthState(auth);
-
   const threadEndpoint: IThreadEndpoint = new ThreadEndpoint();
   const categoryEndpoint: ICategoryEndpoint = new CategoryEndpoint();
   const userEndpoint: IUserEndpoint = new UserEndpoint();
@@ -56,15 +54,18 @@ export const Home = () => {
   };
 
   useEffect(() => {
-    const getUser = async () => {
-      if (user) {
-        const u = await userEndpoint.getUserFromAuth(user.uid);
-        setLoggedInUser(u);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        navigate("/");
+        return;
       }
-    };
 
-    getUser();
-  }, [user]);
+      const u = await userEndpoint.getUserFromAuth(currentUser?.uid);
+      setLoggedInUser(u);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const fetchThreadsAsync = async () => {

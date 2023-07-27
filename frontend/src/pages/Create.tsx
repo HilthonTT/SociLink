@@ -33,6 +33,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Create as CreateIcon } from "@mui/icons-material";
+import { onAuthStateChanged } from "firebase/auth";
 
 export const Create = () => {
   const [user] = useAuthState(auth);
@@ -132,17 +133,18 @@ export const Create = () => {
   };
 
   useEffect(() => {
-    const getUser = async () => {
-      if (user) {
-        const u = await userEndpoint.getUserFromAuth(user.uid);
-        setLoggedInUser(u);
-      } else {
-        navigate("/Login");
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        navigate("/");
+        return;
       }
-    };
 
-    getUser();
-  }, [user]);
+      const u = await userEndpoint.getUserFromAuth(currentUser?.uid);
+      setLoggedInUser(u);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {

@@ -19,6 +19,7 @@ import {
 import { IUserEndpoint, UserEndpoint } from "./endpoints/userEndpoint";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "./firebase/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 enum Pages {
   Home,
@@ -31,7 +32,6 @@ enum SettingsPages {
 }
 
 export const Navbar = () => {
-  const [user] = useAuthState(auth);
   const userEndpoint: IUserEndpoint = new UserEndpoint();
   const navigate = useNavigate();
 
@@ -120,7 +120,7 @@ export const Navbar = () => {
   };
 
   const loadAuthPage = (): void => {
-    if (user) {
+    if (loggedInUser) {
       loadLogoutPage();
     } else {
       loadLoginPage();
@@ -128,7 +128,7 @@ export const Navbar = () => {
   };
 
   const getAuthPageName = (): string => {
-    if (user) {
+    if (loggedInUser) {
       return "Logout";
     } else {
       return "Login";
@@ -182,16 +182,18 @@ export const Navbar = () => {
   };
 
   useEffect(() => {
-    const getLoggedInUser = async () => {
-      if (user) {
-        const u = await userEndpoint.getUserFromAuth(user?.uid);
-        setLoggedInUser(u);
-        console.log(loggedInUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        navigate("/");
+        return;
       }
-    };
 
-    getLoggedInUser();
-  }, [user]);
+      const u = await userEndpoint.getUserFromAuth(currentUser?.uid);
+      setLoggedInUser(u);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <AppBar position="static">

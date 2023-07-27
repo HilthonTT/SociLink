@@ -18,6 +18,7 @@ import { AccountBox, ModeEdit } from "@mui/icons-material";
 import { AlertPasswordDialog } from "./AlertPasswordDialog";
 import { CustomTabPanel, a11yProps } from "../../components/CustomTabPanel";
 import { useNavigate } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
 
 export const Account = () => {
   const [user] = useAuthState(auth);
@@ -35,17 +36,18 @@ export const Account = () => {
   };
 
   useEffect(() => {
-    const getLoggedInUser = async () => {
-      if (user) {
-        const u = await userEndpoint.getUserFromAuth(user?.uid);
-        setLoggedInUser(u);
-      } else {
-        navigate("/login");
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        navigate("/");
+        return;
       }
-    };
 
-    getLoggedInUser();
-  }, [user]);
+      const u = await userEndpoint.getUserFromAuth(currentUser?.uid);
+      setLoggedInUser(u);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <Container>
@@ -58,9 +60,17 @@ export const Account = () => {
           flexDirection: "column",
           alignItems: "center",
         }}>
-        <Avatar sx={{ m: 1, bgcolor: "primary.main", width: 100, height: 100 }}>
-          <AccountBox sx={{ width: 50, height: 50 }} />
-        </Avatar>
+        {loggedInUser?.downloadUrl ? (
+          <Avatar
+            src={loggedInUser.downloadUrl}
+            sx={{ m: 1, bgcolor: "primary.main", width: 100, height: 100 }}
+          />
+        ) : (
+          <Avatar
+            sx={{ m: 1, bgcolor: "primary.main", width: 100, height: 100 }}>
+            <AccountBox sx={{ width: 50, height: 50 }} />
+          </Avatar>
+        )}
         <Typography component="h1" variant="h5">
           Account
         </Typography>

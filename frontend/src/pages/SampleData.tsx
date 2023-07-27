@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CategoryEndpoint,
   ICategoryEndpoint,
@@ -9,6 +9,9 @@ import { User } from "../models/user";
 import { Thread } from "../models/thread";
 import { IThreadEndpoint, ThreadEndpoint } from "../endpoints/threadEndpoint";
 import { BasicUser } from "../models/basicUser";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase/firebase";
+import { useNavigate } from "react-router-dom";
 
 export const SampleData = () => {
   const categoryEndpoint: ICategoryEndpoint = new CategoryEndpoint();
@@ -18,6 +21,8 @@ export const SampleData = () => {
   const [isCatCreated, setIsCatCreated] = useState(false);
   const [isUserCreated, setIsUserCreated] = useState(false);
   const [isThreadsCreated, setIsThreadCreated] = useState(false);
+
+  const navigate = useNavigate();
 
   const createCategories = async () => {
     // examples of categories
@@ -87,6 +92,17 @@ export const SampleData = () => {
 
     setIsThreadCreated(true);
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        navigate("/");
+        return;
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <div>

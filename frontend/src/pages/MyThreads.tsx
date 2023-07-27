@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Thread } from "../models/thread";
 import { IThreadEndpoint, ThreadEndpoint } from "../endpoints/threadEndpoint";
 import { User } from "../models/user";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
 import { IUserEndpoint, UserEndpoint } from "../endpoints/userEndpoint";
 import {
@@ -21,9 +20,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
 
 export const MyThreads = () => {
-  const [user] = useAuthState(auth);
   const navigate = useNavigate();
 
   const threadEndpoint: IThreadEndpoint = new ThreadEndpoint();
@@ -61,17 +60,18 @@ export const MyThreads = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (user) {
-        const u = await userEndpoint.getUserFromAuth(user.uid);
-        setLoggedInUser(u);
-      } else {
-        navigate("/Login");
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        navigate("/");
+        return;
       }
-    };
 
-    fetchData();
-  }, [user]);
+      const u = await userEndpoint.getUserFromAuth(currentUser?.uid);
+      setLoggedInUser(u);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {

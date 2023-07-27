@@ -4,7 +4,6 @@ import { Thread } from "../models/thread";
 import { useNavigate, useParams } from "react-router-dom";
 import { IUserEndpoint, UserEndpoint } from "../endpoints/userEndpoint";
 import { IThreadEndpoint, ThreadEndpoint } from "../endpoints/threadEndpoint";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
 import {
   Avatar,
@@ -24,16 +23,16 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { onAuthStateChanged } from "firebase/auth";
 
 export const Profile = () => {
   const { id } = useParams();
-  const [user] = useAuthState(auth);
 
   const userEndpoint: IUserEndpoint = new UserEndpoint();
   const threadEndpoint: IThreadEndpoint = new ThreadEndpoint();
-  const navigate = useNavigate();
   const initialThreadLimit = 10;
   const loadMoreCount = 10;
+  const navigate = useNavigate();
 
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [formattedDate, setFormattedDate] = useState<string | null>(null);
@@ -62,15 +61,18 @@ export const Profile = () => {
   };
 
   useEffect(() => {
-    const getUser = async () => {
-      if (user) {
-        const u = await userEndpoint.getUserFromAuth(user.uid);
-        setLoggedInUser(u);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        navigate("/");
+        return;
       }
-    };
 
-    getUser();
-  }, [user]);
+      const u = await userEndpoint.getUserFromAuth(currentUser?.uid);
+      setLoggedInUser(u);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const getProfileUser = async () => {
