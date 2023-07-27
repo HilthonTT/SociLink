@@ -87,6 +87,33 @@ export const Details = () => {
     }
   };
 
+  const likeThreadAsync = async () => {
+    await threadEndpoint.updateVoteThreadAsync(
+      thread?._id as string,
+      loggedInUser?._id as string
+    );
+
+    if (!thread || !loggedInUser) {
+      return;
+    }
+
+    await threadEndpoint.updateVoteThreadAsync(thread._id, loggedInUser._id);
+
+    const updatedThread: Thread = { ...thread } as Thread;
+
+    const userIndex = updatedThread.userVotes.indexOf(
+      loggedInUser._id as string
+    );
+
+    if (userIndex !== -1) {
+      updatedThread.userVotes.splice(userIndex, 1);
+    } else {
+      updatedThread.userVotes.push(loggedInUser._id as string);
+    }
+
+    setThread(updatedThread);
+  };
+
   useEffect(() => {
     const getUser = async () => {
       if (user) {

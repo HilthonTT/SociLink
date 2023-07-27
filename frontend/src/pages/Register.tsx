@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { IUserEndpoint, UserEndpoint } from "../endpoints/userEndpoint";
 import {
   User as FirebaseUser,
@@ -112,13 +112,14 @@ export const Register = () => {
     }
   };
 
-  const handleButtonClick = () => {
+  const handleProfilePicClick = () => {
     const fileInput = document.getElementById("fileInput");
     if (fileInput) {
       fileInput.click();
     }
   };
-  const onFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+
+  const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const fetchedFile = event.target.files?.[0];
 
     if (fetchedFile) {
@@ -184,7 +185,7 @@ export const Register = () => {
                 type="button"
                 fullWidth
                 variant="contained"
-                onClick={handleButtonClick}>
+                onClick={handleProfilePicClick}>
                 Upload profile picture
               </Button>
             </Grid>
