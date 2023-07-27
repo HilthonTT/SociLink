@@ -100,7 +100,7 @@ router.get("/users/auth/:objectId", async (req: Request, res: Response) => {
 
 router.put("/users/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     const { firstName, lastName, email, displayName, downloadUrl } = req.body;
 
     const user = await UserModel.findById(id);

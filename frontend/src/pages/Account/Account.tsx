@@ -1,6 +1,5 @@
-import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../firebase/firebase";
-import { SyntheticEvent, useEffect, useState } from "react";
+import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
 import { User } from "../../models/user";
 import { IUserEndpoint, UserEndpoint } from "../../endpoints/userEndpoint";
 import { EmailResetForm } from "./EmailResetForm";
@@ -19,12 +18,14 @@ import { AlertPasswordDialog } from "./AlertPasswordDialog";
 import { CustomTabPanel, a11yProps } from "../../components/CustomTabPanel";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
+import { IImageData, ImageData } from "../../firebase/imageData";
 
 export const Account = () => {
-  const [user] = useAuthState(auth);
   const userEndpoint: IUserEndpoint = new UserEndpoint();
+  const imageData: IImageData = new ImageData();
 
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [value, setValue] = useState(0);
   const [resetEmail, setResetEmail] = useState(false);
   const [resetPassword, setResetPassword] = useState(false);
@@ -33,6 +34,39 @@ export const Account = () => {
 
   const handleValueChange = (event: SyntheticEvent, newValue: number) => {
     setValue(newValue);
+  };
+
+  const handleProfilePicClick = () => {
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput) {
+      fileInput.click();
+    }
+  };
+
+  const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const fetchedFile = event.target.files?.[0];
+
+    if (!fetchedFile) {
+      console.log("No file");
+      return;
+    }
+
+    if (!loggedInUser) {
+      console.log("No user");
+      return;
+    }
+
+    const uploadedFile = await imageData.uploadAsync(
+      fetchedFile,
+      fetchedFile.name
+    );
+
+    const user = loggedInUser;
+    user.downloadUrl = uploadedFile;
+    
+    console.log("URL applied")
+
+    await userEndpoint.updateUser(user);
   };
 
   useEffect(() => {
@@ -60,14 +94,34 @@ export const Account = () => {
           flexDirection: "column",
           alignItems: "center",
         }}>
+        <input
+          id="fileInput"
+          type="file"
+          style={{ display: "none" }}
+          onChange={onFileChange}
+        />
         {loggedInUser?.downloadUrl ? (
           <Avatar
+            onClick={handleProfilePicClick}
             src={loggedInUser.downloadUrl}
-            sx={{ m: 1, bgcolor: "primary.main", width: 100, height: 100 }}
+            sx={{
+              m: 1,
+              bgcolor: "primary.main",
+              width: 100,
+              height: 100,
+              cursor: "pointer",
+            }}
           />
         ) : (
           <Avatar
-            sx={{ m: 1, bgcolor: "primary.main", width: 100, height: 100 }}>
+            onClick={handleProfilePicClick}
+            sx={{
+              m: 1,
+              bgcolor: "primary.main",
+              width: 100,
+              height: 100,
+              cursor: "pointer",
+            }}>
             <AccountBox sx={{ width: 50, height: 50 }} />
           </Avatar>
         )}
