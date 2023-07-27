@@ -86,8 +86,8 @@ export const Login = () => {
           sx={{
             marginTop: 2,
           }}>
-          <AlertTitle>Error!</AlertTitle>
-          <div>This is an alert</div>
+          <AlertTitle>Error logging in!</AlertTitle>
+          <div>{errorMessage}</div>
         </Alert>
       )}
       <Box

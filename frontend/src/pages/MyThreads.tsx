@@ -65,6 +65,8 @@ export const MyThreads = () => {
       if (user) {
         const u = await userEndpoint.getUserFromAuth(user.uid);
         setLoggedInUser(u);
+      } else {
+        navigate("/Login");
       }
     };
 

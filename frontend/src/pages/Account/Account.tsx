@@ -17,6 +17,7 @@ import {
 import { AccountBox, ModeEdit } from "@mui/icons-material";
 import { AlertPasswordDialog } from "./AlertPasswordDialog";
 import { CustomTabPanel, a11yProps } from "../../components/CustomTabPanel";
+import { useNavigate } from "react-router-dom";
 
 export const Account = () => {
   const [user] = useAuthState(auth);
@@ -27,6 +28,8 @@ export const Account = () => {
   const [resetEmail, setResetEmail] = useState(false);
   const [resetPassword, setResetPassword] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleValueChange = (event: SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -36,6 +39,8 @@ export const Account = () => {
       if (user) {
         const u = await userEndpoint.getUserFromAuth(user?.uid);
         setLoggedInUser(u);
+      } else {
+        navigate("/login");
       }
     };
 

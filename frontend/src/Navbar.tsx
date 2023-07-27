@@ -148,6 +148,39 @@ export const Navbar = () => {
     handleCloseUserMenu();
   };
 
+  const renderLinks = (key: string) => {
+    const page = Pages[key as keyof typeof Pages];
+    const pageName = getPageName(page);
+
+    if (page === Pages.MyThreads && !loggedInUser) {
+      return null;
+    }
+
+    return (
+      <MenuItem key={page} onClick={() => loadPages(page)}>
+        <Typography textAlign="center">{pageName}</Typography>
+      </MenuItem>
+    );
+  };
+
+  const renderLinkButtons = (key: string) => {
+    const page = Pages[key as keyof typeof Pages];
+    const pageName = getPageName(page);
+
+    if (page === Pages.MyThreads && !loggedInUser) {
+      return null;
+    }
+
+    return (
+      <Button
+        key={page}
+        onClick={() => loadPages(page)}
+        sx={{ my: 2, color: "white", display: "block" }}>
+        {pageName}
+      </Button>
+    );
+  };
+
   useEffect(() => {
     const getLoggedInUser = async () => {
       if (user) {
@@ -210,14 +243,7 @@ export const Navbar = () => {
                 display: { xs: "block", md: "none" },
               }}>
               {Object.keys(Pages).map((key) => {
-                const page = Pages[key as keyof typeof Pages];
-                const pageName = getPageName(page);
-
-                return (
-                  <MenuItem key={page} onClick={() => loadPages(page)}>
-                    <Typography textAlign="center">{pageName}</Typography>
-                  </MenuItem>
-                );
+                return renderLinks(key);
               })}
             </Menu>
           </Box>
@@ -241,28 +267,23 @@ export const Navbar = () => {
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {Object.keys(Pages).map((key) => {
-              const page = Pages[key as keyof typeof Pages];
-              const pageName = getPageName(page);
-
-              return (
-                <Button
-                  key={page}
-                  onClick={() => loadPages(page)}
-                  sx={{ my: 2, color: "white", display: "block" }}>
-                  {pageName}
-                </Button>
-              );
+              return renderLinkButtons(key);
             })}
           </Box>
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar
-                  alt={loggedInUser?.displayName}
-                  src={loggedInUser?.downloadUrl}
-                />
-              </IconButton>
-            </Tooltip>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <Typography sx={{ marginRight: 1 }}>
+                {loggedInUser?.displayName}
+              </Typography>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar
+                    alt={loggedInUser?.displayName}
+                    src={loggedInUser?.downloadUrl}
+                  />
+                </IconButton>
+              </Tooltip>
+            </div>
             <Menu
               sx={{ mt: "45px" }}
               id="menu-appbar"
