@@ -3,12 +3,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { EmailResetData } from "../../form-models/emailResetData";
 import {
+  onAuthStateChanged,
   sendEmailVerification,
   signInWithEmailAndPassword,
   updateEmail,
 } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
 import {
   Button,
   Dialog,
@@ -19,6 +19,9 @@ import {
   TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { IUserEndpoint, UserEndpoint } from "../../endpoints/userEndpoint";
+import { useNavigate } from "react-router-dom";
+import { User } from "../../models/user";
 
 interface Props {
   isOpen: boolean;
@@ -27,9 +30,11 @@ interface Props {
 
 export const EmailResetForm = (props: Props) => {
   const { isOpen, onClose } = props;
-  const [user] = useAuthState(auth);
 
+  const userEndpoint: IUserEndpoint = new UserEndpoint();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(isOpen);
+  const [loggedInUser, setLoggedInUser] = useState<User | null>();
 
   const handleClose = () => {
     setOpen(false);
@@ -57,7 +62,7 @@ export const EmailResetForm = (props: Props) => {
   });
 
   const handleEmailReset = async (data: EmailResetData) => {
-    if (!user) {
+    if (!loggedInUser) {
       return;
     }
 
@@ -77,6 +82,20 @@ export const EmailResetForm = (props: Props) => {
   useEffect(() => {
     setOpen(isOpen);
   }, [isOpen]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
+        navigate("/");
+        return;
+      }
+
+      const u = await userEndpoint.getUserFromAuth(currentUser?.uid);
+      setLoggedInUser(u);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <Dialog open={open} onClose={handleClose}>

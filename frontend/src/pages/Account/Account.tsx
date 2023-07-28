@@ -19,6 +19,7 @@ import { CustomTabPanel, a11yProps } from "../../components/CustomTabPanel";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { IImageData, ImageData } from "../../firebase/imageData";
+import { DisplayNameDialog } from "./DisplayNameDialog";
 
 export const Account = () => {
   const userEndpoint: IUserEndpoint = new UserEndpoint();
@@ -29,6 +30,7 @@ export const Account = () => {
   const [value, setValue] = useState(0);
   const [resetEmail, setResetEmail] = useState(false);
   const [resetPassword, setResetPassword] = useState(false);
+  const [resetDisplayName, setResetDisplayName] = useState(false);
 
   const navigate = useNavigate();
 
@@ -46,15 +48,11 @@ export const Account = () => {
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const fetchedFile = event.target.files?.[0];
 
-    if (!fetchedFile) {
-      console.log("No file");
+    if (!fetchedFile || !loggedInUser) {
       return;
     }
 
-    if (!loggedInUser) {
-      console.log("No user");
-      return;
-    }
+    setFile(fetchedFile);
 
     const uploadedFile = await imageData.uploadAsync(
       fetchedFile,
@@ -63,8 +61,6 @@ export const Account = () => {
 
     const user = loggedInUser;
     user.downloadUrl = uploadedFile;
-    
-    console.log("URL applied")
 
     await userEndpoint.updateUser(user);
   };
@@ -147,7 +143,10 @@ export const Account = () => {
           <Typography component="div" variant="h6">
             Display Name: {loggedInUser?.displayName}
           </Typography>
-          <Button startIcon={<ModeEdit />} />
+          <Button
+            startIcon={<ModeEdit />}
+            onClick={() => setResetDisplayName(true)}
+          />
         </Box>
         <Box sx={{ justifyContent: "space-between", display: "flex" }}>
           <Typography component="div" variant="h6">
@@ -178,6 +177,11 @@ export const Account = () => {
       <AlertPasswordDialog
         isOpen={resetPassword}
         onClose={() => setResetPassword(false)}
+      />
+
+      <DisplayNameDialog
+        isOpen={resetDisplayName}
+        onClose={() => setResetDisplayName(false)}
       />
     </Container>
   );

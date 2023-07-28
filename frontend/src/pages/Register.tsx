@@ -47,7 +47,11 @@ export const Register = () => {
       .required("Your last name is required.")
       .min(2, "Your last name must be at least 2 characters long")
       .max(200, "Your last name must not be above 200 characters long."),
-    displayName: yup.string().required("Your display name is required."),
+    displayName: yup
+      .string()
+      .required("Your display name is required.")
+      .min(2)
+      .max(80),
     email: yup.string().email().required("Your email is required."),
     password: yup
       .string()
