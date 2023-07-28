@@ -2,7 +2,7 @@ import { auth } from "../../firebase/firebase";
 import { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
 import { User } from "../../models/user";
 import { IUserEndpoint, UserEndpoint } from "../../endpoints/userEndpoint";
-import { EmailResetForm } from "./EmailResetForm";
+import { EmailResetDialog } from "./EmailResetDialog";
 import {
   Avatar,
   Box,
@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { AccountBox, ModeEdit } from "@mui/icons-material";
-import { AlertPasswordDialog } from "./AlertPasswordDialog";
+import { PasswordDialog } from "./PasswordDialog";
 import { CustomTabPanel, a11yProps } from "../../components/CustomTabPanel";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
@@ -169,12 +169,12 @@ export const Account = () => {
         <Typography></Typography>
       </CustomTabPanel>
 
-      <EmailResetForm
+      <EmailResetDialog
         isOpen={resetEmail}
         onClose={() => setResetEmail(false)}
       />
 
-      <AlertPasswordDialog
+      <PasswordDialog
         isOpen={resetPassword}
         onClose={() => setResetPassword(false)}
       />

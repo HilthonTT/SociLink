@@ -18,7 +18,7 @@ interface Props {
   onClose: (isOpen: boolean) => void;
 }
 
-export const AlertPasswordDialog = (props: Props) => {
+export const PasswordDialog = (props: Props) => {
   const { isOpen, onClose } = props;
 
   const userEndpoint: IUserEndpoint = new UserEndpoint();

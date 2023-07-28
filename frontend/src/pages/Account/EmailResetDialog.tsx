@@ -28,7 +28,7 @@ interface Props {
   onClose: (isOpen: boolean) => void;
 }
 
-export const EmailResetForm = (props: Props) => {
+export const EmailResetDialog = (props: Props) => {
   const { isOpen, onClose } = props;
 
   const userEndpoint: IUserEndpoint = new UserEndpoint();
