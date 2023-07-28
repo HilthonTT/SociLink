@@ -9,6 +9,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { DisplayNameData } from "../../form-models/displayNameData";
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -100,6 +101,9 @@ export const DisplayNameDialog = (props: Props) => {
             helperText="Please enter your new display name."
             {...register("displayName")}
           />
+          {errors?.displayName && (
+            <Alert severity="error">{errors.displayName.message}</Alert>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>

@@ -18,6 +18,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
 import { IUserEndpoint, UserEndpoint } from "../endpoints/userEndpoint";
 import {
+  Alert,
   Avatar,
   Box,
   Button,
@@ -79,7 +80,7 @@ export const Create = () => {
   };
 
   const onCategoryChange = (event: SelectChangeEvent) => {
-    setCategoryId(event.target.value);
+    setCategoryId(event.target.value as string);
   };
 
   const onCreateThreadAsync = async (data: CreateData) => {
@@ -100,7 +101,7 @@ export const Create = () => {
       );
 
       thread.category = categories?.find(
-        (c) => c.id === categoryId
+        (c) => c._id === categoryId
       ) as Category;
 
       if (!thread.category) {
@@ -159,6 +160,12 @@ export const Create = () => {
     fetchCategories();
   }, []);
 
+  const [age, setAge] = useState("");
+
+  const handleChange = (event: SelectChangeEvent) => {
+    setAge(event.target.value as string);
+  };
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -213,6 +220,9 @@ export const Create = () => {
                 helperText="Summarize your thread in less than 75 characters."
                 {...register("thread")}
               />
+              {errors.thread && (
+                <Alert severity="error">{errors.thread.message}</Alert>
+              )}
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -224,9 +234,12 @@ export const Create = () => {
                 multiline
                 {...register("description")}
               />
+              {errors.description && (
+                <Alert severity="error">{errors.description.message}</Alert>
+              )}
             </Grid>
             <Grid item xs={12}>
-              <FormControl variant="standard" fullWidth>
+              <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-standard-label">
                   Category
                 </InputLabel>
@@ -238,7 +251,7 @@ export const Create = () => {
                   onChange={onCategoryChange}
                   fullWidth>
                   {categories?.map((cat) => (
-                    <MenuItem key={cat.id} value={cat.id}>
+                    <MenuItem key={cat._id} value={cat._id}>
                       {cat.name}
                     </MenuItem>
                   ))}

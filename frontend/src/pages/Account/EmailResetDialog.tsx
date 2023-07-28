@@ -10,6 +10,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../../firebase/firebase";
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -117,6 +118,9 @@ export const EmailResetDialog = (props: Props) => {
             helperText="Please enter your correct current email address."
             {...register("currentEmail")}
           />
+          {errors?.currentEmail && (
+            <Alert severity="error">{errors.currentEmail.message}</Alert>
+          )}
           <TextField
             autoFocus
             margin="dense"
@@ -129,6 +133,9 @@ export const EmailResetDialog = (props: Props) => {
             helperText="Please a correct email address."
             {...register("newEmail")}
           />
+          {errors?.newEmail && (
+            <Alert severity="error">{errors.newEmail.message}</Alert>
+          )}
           <TextField
             autoFocus
             margin="dense"
@@ -141,6 +148,9 @@ export const EmailResetDialog = (props: Props) => {
             helperText="Please enter your current password."
             {...register("password")}
           />
+          {errors?.password && (
+            <Alert severity="error">{errors.password.message}</Alert>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
