@@ -4,11 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { LoginData } from "../form-models/loginData";
 import { useEffect, useState } from "react";
-import {
-  User as FirebaseUser,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
+import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -25,7 +21,6 @@ import Container from "@mui/material/Container";
 import { Alert, AlertTitle } from "@mui/material";
 
 export const Login = () => {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
@@ -68,7 +63,6 @@ export const Login = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
       if (currentUser) {
         navigate("/");
       }
@@ -118,6 +112,9 @@ export const Login = () => {
             autoFocus
             {...register("email")}
           />
+          {errors.email && (
+            <Alert severity="error">{errors.email.message}</Alert>
+          )}
           <TextField
             margin="normal"
             required
@@ -128,6 +125,9 @@ export const Login = () => {
             autoComplete="current-password"
             {...register("password")}
           />
+          {errors.password && (
+            <Alert severity="error">{errors.password.message}</Alert>
+          )}
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"

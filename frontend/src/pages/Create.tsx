@@ -14,7 +14,6 @@ import { Thread } from "../models/thread";
 import { BasicUser } from "../models/basicUser";
 import { User } from "../models/user";
 import { IImageData, ImageData } from "../firebase/imageData";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
 import { IUserEndpoint, UserEndpoint } from "../endpoints/userEndpoint";
 import {
@@ -37,7 +36,6 @@ import { Create as CreateIcon } from "@mui/icons-material";
 import { onAuthStateChanged } from "firebase/auth";
 
 export const Create = () => {
-  const [user] = useAuthState(auth);
   const navigate = useNavigate();
 
   const threadEndpoint: IThreadEndpoint = new ThreadEndpoint();
@@ -106,6 +104,7 @@ export const Create = () => {
 
       if (!thread.category) {
         setCategoryId("");
+        setErrorMessage("Your chosen category is unavailable.");
         return;
       }
 
@@ -136,7 +135,7 @@ export const Create = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
-        navigate("/");
+        navigate("/login");
         return;
       }
 
@@ -160,15 +159,10 @@ export const Create = () => {
     fetchCategories();
   }, []);
 
-  const [age, setAge] = useState("");
-
-  const handleChange = (event: SelectChangeEvent) => {
-    setAge(event.target.value as string);
-  };
-
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
+      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       <Box
         sx={{
           marginTop: 8,

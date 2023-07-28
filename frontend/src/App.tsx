@@ -12,6 +12,7 @@ import { Box, Container, Link, Typography } from "@mui/material";
 import {} from "@mui/material/styles";
 import { MyThreads } from "./pages/MyThreads";
 import { Account } from "./pages/Account/Account";
+import { ForgotPassword } from "./pages/ForgotPassword";
 
 const Copyright = () => {
   return (
@@ -37,6 +38,7 @@ export const App = () => {
           <Route path="/Register" element={<Register />} />
           <Route path="/Login" element={<Login />} />
           <Route path="/Logout" element={<Logout />} />
+          <Route path="/ForgotPassword" element={<ForgotPassword />} />
           <Route path="/Create" element={<Create />} />
           <Route path="/Details/:id" element={<Details />} />
           <Route path="/Profile/:id" element={<Profile />} />

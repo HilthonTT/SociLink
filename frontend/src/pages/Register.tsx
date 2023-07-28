@@ -26,6 +26,7 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import { Alert } from "@mui/material";
 
 export const Register = () => {
   const userEndpoint: IUserEndpoint = new UserEndpoint();
@@ -150,6 +151,7 @@ export const Register = () => {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
+      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       <Box
         sx={{
           marginTop: 8,
@@ -203,6 +205,9 @@ export const Register = () => {
                 autoFocus
                 {...register("firstName")}
               />
+              {errors.firstName && (
+                <Alert severity="error">{errors.firstName.message}</Alert>
+              )}
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -213,6 +218,9 @@ export const Register = () => {
                 autoComplete="family-name"
                 {...register("lastName")}
               />
+              {errors.lastName && (
+                <Alert severity="error">{errors.lastName.message}</Alert>
+              )}
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -223,6 +231,9 @@ export const Register = () => {
                 autoComplete="username"
                 {...register("displayName")}
               />
+              {errors.displayName && (
+                <Alert severity="error">{errors.displayName.message}</Alert>
+              )}
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -244,6 +255,9 @@ export const Register = () => {
                 autoComplete="new-password"
                 {...register("password")}
               />
+              {errors.password && (
+                <Alert severity="error">{errors.password.message}</Alert>
+              )}
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -255,6 +269,11 @@ export const Register = () => {
                 autoComplete="confirmed-password"
                 {...register("confirmedPassword")}
               />
+              {errors.confirmedPassword && (
+                <Alert severity="error">
+                  {errors.confirmedPassword.message}
+                </Alert>
+              )}
             </Grid>
             <Grid item xs={12}>
               <FormControlLabel

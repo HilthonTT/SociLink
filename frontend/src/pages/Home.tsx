@@ -56,7 +56,7 @@ export const Home = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
-        navigate("/");
+        navigate("/login");
         return;
       }
 

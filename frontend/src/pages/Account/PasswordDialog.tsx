@@ -43,7 +43,7 @@ export const PasswordDialog = (props: Props) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (!currentUser) {
-        navigate("/");
+        navigate("/login");
         return;
       }
 
