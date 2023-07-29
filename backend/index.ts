@@ -5,24 +5,39 @@ import categoryRoute from "./routes/CategoryRoute";
 import commentRoute from "./routes/CommentRoute";
 import express from "express";
 import cors from "cors";
-const appSettings = require("./config/appsettings_dev.json");
 
 interface AppSettings {
   mongoDb: {
     ConnectionString: string;
     DbName: string;
   };
+  frontend: {
+    url: string;
+  };
+}
+
+const environment = process.env.NODE_ENV;
+const isDebug = environment === ("development" as string);
+let appSettings = {} as AppSettings;
+
+if (isDebug as boolean) {
+  appSettings = require("./config/appsettings_dev.json") as AppSettings;
+} else {
+  appSettings = require("./config/appsettings.json") as AppSettings;
 }
 
 const app = express();
-const settings = appSettings as AppSettings;
 const port = 3001;
 const apiUrl = "/api";
 
-app.use(express.json());
-app.use(cors());
+const corsOptions = {
+  origin: appSettings.frontend.url,
+};
 
-const mongoURI = settings.mongoDb.ConnectionString;
+app.use(express.json());
+app.use(cors(corsOptions));
+
+const mongoURI = appSettings.mongoDb.ConnectionString;
 
 async function connectToMongoDB() {
   try {
