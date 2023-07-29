@@ -1,7 +1,6 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { IUserEndpoint, UserEndpoint } from "../endpoints/userEndpoint";
 import {
-  User as FirebaseUser,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -33,7 +32,6 @@ export const Register = () => {
   const imageData: IImageData = new ImageData();
   const navigate = useNavigate();
 
-  const [user, setUser] = useState<FirebaseUser | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
@@ -132,20 +130,14 @@ export const Register = () => {
     }
   };
 
-  const getAuthState = () => {
-    if (user) {
-      navigate("/");
-    }
-  };
-
   useEffect(() => {
-    onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        navigate("/");
+      }
     });
-  }, []);
 
-  useEffect(() => {
-    getAuthState();
+    return () => unsubscribe();
   }, []);
 
   return (
