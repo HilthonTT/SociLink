@@ -17,7 +17,6 @@ import {
   Tooltip,
 } from "@mui/material";
 import { IUserEndpoint, UserEndpoint } from "./endpoints/userEndpoint";
-import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "./firebase/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -192,6 +191,7 @@ export const Navbar = () => {
     });
 
     return () => unsubscribe();
+    //eslint-disable-next-line
   }, []);
 
   return (

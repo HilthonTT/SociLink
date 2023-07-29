@@ -61,6 +61,10 @@ export const Login = () => {
     navigate("/Register");
   };
 
+  const loadForgotPasswordPage = () => {
+    navigate("/ForgotPassword");
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
@@ -69,6 +73,7 @@ export const Login = () => {
     });
 
     return () => unsubscribe();
+    //eslint-disable-next-line
   }, []);
 
   return (
@@ -97,11 +102,7 @@ export const Login = () => {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <Box
-          component="form"
-          onSubmit={handleSubmit(onLogin)}
-          noValidate
-          sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSubmit(onLogin)} sx={{ mt: 1 }}>
           <TextField
             margin="normal"
             required
@@ -141,13 +142,13 @@ export const Login = () => {
           </Button>
           <Grid container>
             <Grid item xs>
-              <Link href="#" variant="body2">
+              <Link onClick={loadForgotPasswordPage} variant="body2" href="">
                 Forgot password?
               </Link>
             </Grid>
             <Grid item>
-              <Link href="#" variant="body2" onClick={loadRegisterPage}>
-                {"Don't have an account? Sign Up"}
+              <Link variant="body2" onClick={loadRegisterPage} href="">
+                Don't have an account? Sign Up
               </Link>
             </Grid>
           </Grid>

@@ -19,7 +19,6 @@ import {
   Typography,
 } from "@mui/material";
 import PasswordIcon from "@mui/icons-material/Password";
-import { FirebaseError } from "firebase/app";
 
 export const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -66,6 +65,7 @@ export const ForgotPassword = () => {
     });
 
     return () => unsubscribe();
+    //eslint-disable-next-line
   }, []);
 
   return (
@@ -90,7 +90,6 @@ export const ForgotPassword = () => {
         </Typography>
         <Box
           component="form"
-          noValidate
           onSubmit={handleSubmit(onPasswordResetClick)}
           sx={{ mt: 3 }}>
           <Grid container spacing={2}>

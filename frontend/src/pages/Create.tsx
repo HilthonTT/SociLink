@@ -144,6 +144,7 @@ export const Create = () => {
     });
 
     return () => unsubscribe();
+    //eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -157,6 +158,7 @@ export const Create = () => {
     };
 
     fetchCategories();
+    //eslint-disable-next-line
   }, []);
 
   return (

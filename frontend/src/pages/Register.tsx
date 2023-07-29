@@ -130,6 +130,10 @@ export const Register = () => {
     }
   };
 
+  const loadLoginPage = () => {
+    navigate("/Login");
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
@@ -138,6 +142,7 @@ export const Register = () => {
     });
 
     return () => unsubscribe();
+    //eslint-disable-next-line
   }, []);
 
   return (
@@ -168,7 +173,6 @@ export const Register = () => {
         </Typography>
         <Box
           component="form"
-          noValidate
           onSubmit={handleSubmit(onRegistration)}
           sx={{ mt: 3 }}>
           <Grid container spacing={2}>
@@ -236,6 +240,9 @@ export const Register = () => {
                 autoComplete="email"
                 {...register("email")}
               />
+              {errors.email && (
+                <Alert severity="error">{errors.email.message}</Alert>
+              )}
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -283,7 +290,7 @@ export const Register = () => {
           </Button>
           <Grid container justifyContent="flex-end">
             <Grid item>
-              <Link href="#" variant="body2">
+              <Link onClick={loadLoginPage} variant="body2" href="">
                 Already have an account? Sign in
               </Link>
             </Grid>
