@@ -107,6 +107,7 @@ router.put("/threads/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { thread, description, downloadUrl } = req.body;
+    const key = cacheKeyPrefix + id;
 
     const updatedThread = await ThreadModel.findByIdAndUpdate(
       id,
@@ -118,6 +119,7 @@ router.put("/threads/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Thread not found" });
     }
 
+    threadCache.delete(key);
     res.json(updatedThread);
   } catch (error) {
     console.error("Error updating thread:", error);
@@ -128,6 +130,7 @@ router.put("/threads/:id", async (req: Request, res: Response) => {
 router.put("/threads/updateVote/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
   const { userId } = req.body;
+  const key = cacheKeyPrefix + id;
 
   const session = await mongoose.startSession();
 
@@ -173,6 +176,7 @@ router.put("/threads/updateVote/:id", async (req: Request, res: Response) => {
     await session.commitTransaction();
     session.endSession();
 
+    threadCache.delete(key);
     res.json({ message: "Vote updated successfully" });
   } catch (error) {
     await session.abortTransaction();
