@@ -18,7 +18,8 @@ router.get(
     try {
       const { threadId } = req.params;
 
-      const cachedComments = commentsCache.get(cacheKey + threadId);
+      const key = cacheKey + threadId;
+      const cachedComments = commentsCache.get(key);
       if (cachedComments) {
         return res.json(cachedComments);
       }

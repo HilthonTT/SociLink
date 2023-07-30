@@ -147,6 +147,6 @@ export class ThreadEndpoint implements IThreadEndpoint {
     threadId: string,
     userId: string
   ): Promise<void> => {
-    await axios.put(`${this.apiUrl}/threads/${threadId}`, userId);
+    await axios.put(`${this.apiUrl}/threads/updateVote/${threadId}/${userId}`);
   };
 }

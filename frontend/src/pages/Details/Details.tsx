@@ -37,6 +37,8 @@ import { AccountBox, ModeEdit, Send } from "@mui/icons-material";
 import { CustomTabPanel, a11yProps } from "../../components/CustomTabPanel";
 import { ThreadForm } from "./ThreadForm";
 import { DescriptionForm } from "./DescriptionForm";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbDownAltIcon from "@mui/icons-material/ThumbDownAlt";
 
 export const Details = () => {
   const { id } = useParams();
@@ -96,8 +98,6 @@ export const Details = () => {
     if (!thread || !loggedInUser) {
       return;
     }
-
-    await threadEndpoint.updateVoteThreadAsync(thread._id, loggedInUser._id);
 
     const updatedThread: Thread = { ...thread } as Thread;
 
@@ -237,6 +237,25 @@ export const Details = () => {
           <Typography component="div" variant="h6">
             Date Posted: {formattedDate}
           </Typography>
+        </Box>
+        <Box component="div" sx={{ justifyContent: "center", display: "flex" }}>
+          {thread?.userVotes.find((u) => u === loggedInUser?._id) ? (
+            <Button
+              startIcon={<ThumbDownAltIcon />}
+              color="error"
+              variant="contained"
+              sx={{ width: "50%", margin: 2 }}
+              onClick={likeThreadAsync}
+            />
+          ) : (
+            <Button
+              startIcon={<ThumbUpIcon />}
+              color="success"
+              variant="contained"
+              sx={{ width: "50%", margin: 2 }}
+              onClick={likeThreadAsync}
+            />
+          )}
         </Box>
         <Divider sx={{ borderWidth: 2 }} />
         <Box

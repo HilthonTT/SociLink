@@ -127,63 +127,65 @@ router.put("/threads/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.put("/threads/updateVote/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { userId } = req.body;
-  const key = cacheKeyPrefix + id;
+router.put(
+  "/threads/updateVote/:id/:userId",
+  async (req: Request, res: Response) => {
+    const { id, userId } = req.params;
+    const key = cacheKeyPrefix + id;
 
-  const session = await mongoose.startSession();
+    const session = await mongoose.startSession();
 
-  try {
-    session.startTransaction();
+    try {
+      session.startTransaction();
 
-    const thread = await ThreadModel.findById(id).session(session);
+      const thread = await ThreadModel.findById(id).session(session);
 
-    if (!thread) {
+      if (!thread) {
+        await session.abortTransaction();
+        return res.status(404).json({ error: "Thread not found" });
+      }
+
+      const isUpVote = thread.userVotes.includes(userId);
+
+      if (isUpVote) {
+        thread.userVotes = thread.userVotes.filter((id) => id !== userId);
+      } else {
+        thread.userVotes.push(userId);
+      }
+
+      await thread.save();
+
+      const user = await UserModel.findById(userId).session(session);
+
+      if (!user) {
+        await session.abortTransaction();
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (isUpVote) {
+        user.votedOnThreads = user.votedOnThreads.filter((t) => t._id !== id);
+      } else {
+        const newThread: BasicThread = {
+          _id: thread.id,
+          thread: thread.thread,
+        };
+        user.votedOnThreads.push(newThread);
+      }
+
+      await user.save();
+
+      await session.commitTransaction();
+      session.endSession();
+
+      threadCache.delete(key);
+      res.json({ message: "Vote updated successfully" });
+    } catch (error) {
       await session.abortTransaction();
-      return res.status(404).json({ error: "Thread not found" });
+      session.endSession();
+      console.error("Error updating vote:", error);
+      res.status(500).json({ error: "Error updating vote" });
     }
-
-    const isUpVote = thread.userVotes.includes(userId);
-
-    if (isUpVote) {
-      thread.userVotes = thread.userVotes.filter((id) => id !== userId);
-    } else {
-      thread.userVotes.push(userId);
-    }
-
-    await thread.save();
-
-    const user = await UserModel.findById(userId).session(session);
-
-    if (!user) {
-      await session.abortTransaction();
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    if (isUpVote) {
-      const newThread: BasicThread = {
-        _id: thread.id,
-        thread: thread.thread,
-      };
-      user.votedOnThreads.push(newThread);
-    } else {
-      user.votedOnThreads = user.votedOnThreads.filter((t) => t._id !== id);
-    }
-
-    await user.save();
-
-    await session.commitTransaction();
-    session.endSession();
-
-    threadCache.delete(key);
-    res.json({ message: "Vote updated successfully" });
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    console.error("Error updating vote:", error);
-    res.status(500).json({ error: "Error updating vote" });
   }
-});
+);
 
 export default router;
