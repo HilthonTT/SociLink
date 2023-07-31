@@ -7,7 +7,6 @@ import {
   ICategoryEndpoint,
 } from "../endpoints/categoryEndpoint";
 import { useNavigate } from "react-router-dom";
-import { User } from "../models/user";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -20,17 +19,19 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { auth } from "../firebase/firebase";
-import { IUserEndpoint, UserEndpoint } from "../endpoints/userEndpoint";
 import { onAuthStateChanged } from "firebase/auth";
+import { Avatar, List, ListItemAvatar, ListItemButton, ListItemText, ListSubheader } from "@mui/material";
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import SportsScoreIcon from '@mui/icons-material/SportsScore';
+import BusinessIcon from '@mui/icons-material/Business';
+import CurrencyBitcoinIcon from '@mui/icons-material/CurrencyBitcoin';
+import BorderClearIcon from '@mui/icons-material/BorderClear';
 
 export const Home = () => {
   const threadEndpoint: IThreadEndpoint = new ThreadEndpoint();
   const categoryEndpoint: ICategoryEndpoint = new CategoryEndpoint();
-  const userEndpoint: IUserEndpoint = new UserEndpoint();
 
   const navigate = useNavigate();
-
-  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   );
@@ -49,9 +50,46 @@ export const Home = () => {
     navigate("/Create");
   };
 
-  const onCategoryClick = (category: Category) => {
+  const onCategoryClick = async (category: Category | null) => {
     setSelectedCategory(category);
+    await filterThreads();
   };
+
+  const filterThreads = async () => {
+    const allThreads = await threadEndpoint.getThreadsAsync();
+
+    if (!selectedCategory) {
+      setThreads(allThreads);
+      return;
+    }
+
+    const filteredThreads = allThreads.filter((thread) => {
+      return (
+        thread.category.name === selectedCategory.name || thread.category._id === selectedCategory._id
+      );
+    });
+
+    setThreads(filteredThreads);
+  }
+
+  const getListItemAvatar = (category: Category | null) => {
+    if (!category) {
+      return <BorderClearIcon />;
+    }
+
+    switch (category.name) {
+      case "Gaming":
+        return <SportsEsportsIcon />;
+      case "Sports":
+        return <SportsScoreIcon />;
+      case "Business":
+        return <BusinessIcon />;
+      case "Crypto":
+        return <CurrencyBitcoinIcon />;
+      default:
+        return <BorderClearIcon />;
+    }
+  }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -59,9 +97,6 @@ export const Home = () => {
         navigate("/login");
         return;
       }
-
-      const u = await userEndpoint.getUserFromAuth(currentUser?.uid);
-      setLoggedInUser(u);
     });
 
     return () => unsubscribe();
@@ -85,16 +120,57 @@ export const Home = () => {
     fetchCategoriesAsync();
   }, []);
 
+  useEffect(() => {
+    filterThreads();
+  }, [selectedCategory]);
+
   return (
     <div>
       <CssBaseline />
       <main>
         <Box
+          display="flex"
           sx={{
             bgcolor: "background.paper",
             pt: 8,
             pb: 6,
           }}>
+          <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
+            subheader={
+              <ListSubheader component="div" id="category-list-subheader">
+                Categories
+              </ListSubheader>
+            }>
+            <ListItemButton
+              selected={selectedCategory?._id === ""}
+              onClick={() => onCategoryClick(null)}
+              sx={{ cursor: "pointer" }}>
+              <ListItemAvatar>
+                <Avatar>
+                  {getListItemAvatar(null)}
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary="All"
+                secondary="Select all the threads." />
+            </ListItemButton>
+            {categories?.map((cat) => (
+              <ListItemButton
+                key={cat._id}
+                selected={selectedCategory?._id === cat._id}
+                onClick={() => onCategoryClick(cat)}
+                sx={{ cursor: "pointer" }}>
+                <ListItemAvatar>
+                  <Avatar>
+                    {getListItemAvatar(cat)}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={cat.name}
+                  secondary={cat.description} />
+              </ListItemButton>
+            ))}
+          </List>
           <Container maxWidth="lg">
             <Typography
               component="h1"
