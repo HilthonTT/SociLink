@@ -90,17 +90,11 @@ export const Details = () => {
   };
 
   const likeThreadAsync = async () => {
-    await threadEndpoint.updateVoteThreadAsync(
-      thread?._id as string,
-      loggedInUser?._id as string
-    );
+    const updatedThread: Thread = { ...thread } as Thread;
 
     if (!thread || !loggedInUser) {
       return;
     }
-
-    const updatedThread: Thread = { ...thread } as Thread;
-
     const userIndex = updatedThread.userVotes.indexOf(
       loggedInUser._id as string
     );
@@ -112,6 +106,11 @@ export const Details = () => {
     }
 
     setThread(updatedThread);
+
+    await threadEndpoint.updateVoteThreadAsync(
+      thread?._id as string,
+      loggedInUser?._id as string
+    );
   };
 
   useEffect(() => {

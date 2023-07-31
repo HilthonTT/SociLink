@@ -157,9 +157,6 @@ export const Home = () => {
                     <Button size="small" onClick={() => openDetails(thread)}>
                       View
                     </Button>
-                    {loggedInUser?._id === (thread.author?._id as string) && (
-                      <Button size="small">Edit</Button>
-                    )}
                   </CardActions>
                 </Card>
               </Grid>
